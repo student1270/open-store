@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="uz" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' – OpenStore'">Mahsulot Qo'shish – OpenStore</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .category-box {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+        }
+        .category-item {
+            padding: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .category-item:hover {
+            background-color: #f7fafc;
+        }
+        .selected-category {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #ebf8ff;
+            border: 1px solid #4299e1;
+            border-radius: 0.25rem;
+            margin-top: 0.5rem;
+        }
+        .status-message {
+            margin-left: 10px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .hidden {
+            display: none;
+        }
+        .back-btn {
+            padding: 5px 10px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .back-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-black min-h-screen">
+<div id="productModal" class="modal" style="display: flex;">
+    <div class="modal-content">
+        <h3 class="text-xl font-bold mb-4 text-gray-800">Mahsulot qo'shish</h3>
+        <form id="productForm" th:action="@{/admin/add-product}" method="post" enctype="multipart/form-data">
+            <!-- Rasm yuklash qismi -->
+            <div class="mb-4">
+                <label class="block text-gray-700">Rasm yuklash</label>
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">📎</span>
+                    <input type="file" id="productImage" name="image" class="w-full mt-1 p-2 border rounded" accept="image/jpeg,image/png,image/jpg" required>
+                    <span id="statusMessage" class="status-message"></span>
+                </div>
+                <span id="imageName" class="text-sm text-gray-500"></span>
+            </div>
+
+            <!-- Mahsulot nomi -->
+            <div class="mb-4">
+                <label for="productName" class="block text-gray-700">Nomi *</label>
+                <input type="text" id="productName" name="name" class="w-full mt-1 p-2 border rounded" required>
+            </div>
+
+            <!-- Narxi -->
+            <div class="mb-4">
+                <label for="productPrice" class="block text-gray-700">Narxi (so'm) *</label>
+                <input type="number" id="productPrice" name="price" min="0" class="w-full mt-1 p-2 border rounded" required>
+            </div>
+
+            <!-- Soni -->
+            <div class="mb-4">
+                <label for="productQuantity" class="block text-gray-700">Soni *</label>
+                <input type="number" id="productQuantity" name="quantity" min="1" class="w-full mt-1 p-2 border rounded" required>
+            </div>
+
+            <!-- Tavsif -->
+            <div class="mb-4">
+                <label for="productDescription" class="block text-gray-700">Tavsif</label>
+                <textarea id="productDescription" name="description" class="w-full mt-1 p-2 border rounded" rows="3"></textarea>
+            </div>
+
+            <!-- Kategoriya tanlash -->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Kategoriya tanlang *</label>
+
+                <!-- 1. Asosiy kategoriyalar -->
+                <div id="mainCategories" class="category-box">
+                    <div class="category-item" data-category="elektronika">Elektronika</div>
+                    <div class="category-item" data-category="maishiy">Maishiy texnika</div>
+                    <div class="category-item" data-category="kiyim">Kiyim</div>
+                    <div class="category-item" data-category="poyabzal">Poyabzallar</div>
+                    <div class="category-item" data-category="aksessuar">Aksessuarlar</div>
+                    <div class="category-item" data-category="gozallik">Go'zallik va parvarish</div>
+                    <div class="category-item" data-category="salomatlik">Salomatlik</div>
+                    <div class="category-item" data-category="qurilish">Qurilish va ta'mirlash</div>
+                </div>
+
+                <!-- 2. Subkategoriyalar (Elektronika) -->
+                <div id="subCategoriesElektronika" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="smartfonlar">Smartfonlar va telefonlar</div>
+                    <div class="category-item" data-category="kompyuter">Kompyuter texnikasi</div>
+                    <div class="category-item" data-category="geym">Geymerlar uchun mahsulotlar</div>
+                    <div class="category-item" data-category="noutbuk">Noutbuklar, planshetlar va elektron kitoblar</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Smartfonlar) -->
+                <div id="finalSubCategoriesSmartfonlar" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="smartfon_aks">Smartfonlar uchun aksessuarlar</div>
+                    <div class="category-item" data-category="knopka">Knopkali telefonlar</div>
+                    <div class="category-item" data-category="smartfon">Smartfonlar</div>
+                    <div class="category-item" data-category="ehtiyot">Ehtiyot qismlar va ta'mirlash</div>
+                    <div class="category-item" data-category="statsionar">Statsionar telephone</div>
+                </div>
+
+                <!-- Tanlangan kategoriya ko'rinishi -->
+                <div id="selectedCategoryBox" class="hidden mt-4">
+                    <span id="selectedCategoryText" class="selected-category"></span>
+                    <button id="changeCategoryBtn" type="button" class="ml-3 px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600">
+                        Qayta tanlash
+                    </button>
+                    <input type="hidden" id="selectedCategoryValue" name="category">
+                </div>
+            </div>
+
+            <button type="submit" id="uploadButton" class="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 hidden">Yuklash</button>
+        </form>
+        <button id="closeModal" class="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">Yopish</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const productModal = document.getElementById('productModal');
+        const closeModal = document.getElementById('closeModal');
+        const productImage = document.getElementById('productImage');
+        const statusMessage = document.getElementById('statusMessage');
+        const imageName = document.getElementById('imageName');
+        const uploadButton = document.getElementById('uploadButton');
+        const productName = document.getElementById('productName');
+        const productPrice = document.getElementById('productPrice');
+        const productQuantity = document.getElementById('productQuantity');
+        const productDescription = document.getElementById('productDescription');
+        const mainCategories = document.getElementById('mainCategories');
+        const subCategoriesElektronika = document.getElementById('subCategoriesElektronika');
+        const finalSubCategoriesSmartfonlar = document.getElementById('finalSubCategoriesSmartfonlar');
+        const selectedCategoryBox = document.getElementById('selectedCategoryBox');
+        const selectedCategoryText = document.getElementById('selectedCategoryText');
+        const selectedCategoryValue = document.getElementById('selectedCategoryValue');
+        const changeCategoryBtn = document.getElementById('changeCategoryBtn');
+
+        window.addEventListener('load', () => {
+            productModal.style.display = 'flex';
+        });
+
+        closeModal.addEventListener('click', () => {
+            productModal.style.display = 'none';
+            resetForm();
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === productModal) {
+                productModal.style.display = 'none';
+                resetForm();
+            }
+        });
+
+        mainCategories.addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const category = e.target.getAttribute('data-category');
+                if (category === 'elektronika') {
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.remove('hidden');
+                }
+            }
+        });
+
+        subCategoriesElektronika.addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const subCategory = e.target.getAttribute('data-category');
+                if (subCategory === 'smartfonlar') {
+                    subCategoriesElektronika.classList.add('hidden');
+                    finalSubCategoriesSmartfonlar.classList.remove('hidden');
+                }
+            }
+        });
+
+        finalSubCategoriesSmartfonlar.addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'smartfon') {
+                    selectedCategoryText.textContent = "Elektronika > Smartfonlar va telefonlar > Smartfonlar";
+                    selectedCategoryValue.value = "elektronika:smartfonlar:smartfon";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.add('hidden');
+                    finalSubCategoriesSmartfonlar.classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        changeCategoryBtn.addEventListener('click', function() {
+            document.querySelectorAll('.category-box').forEach(box => box.classList.add('hidden'));
+            mainCategories.classList.remove('hidden');
+            selectedCategoryBox.classList.add('hidden');
+            selectedCategoryValue.value = '';
+            checkFormValidity();
+        });
+
+        function checkFormValidity() {
+            const file = productImage.files[0];
+            const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            const isImageValid = file && validImageTypes.includes(file.type);
+            const isNameValid = productName.value.trim() !== '';
+            const isPriceValid = productPrice.value.trim() !== '' && parseFloat(productPrice.value) >= 0;
+            const isQuantityValid = productQuantity.value.trim() !== '' && parseInt(productQuantity.value) >= 1;
+            const isCategorySelected = !selectedCategoryBox.classList.contains('hidden');
+
+            if (isImageValid) {
+                statusMessage.textContent = "To'g'ri formatdagi fayl";
+                statusMessage.className = "status-message bg-green-500 text-white";
+                imageName.textContent = file.name;
+            } else if (file) {
+                statusMessage.textContent = "Fayl formati noto'g'ri";
+                statusMessage.className = "status-message bg-red-500 text-white";
+                imageName.textContent = '';
+            } else {
+                statusMessage.textContent = '';
+                imageName.textContent = '';
+            }
+
+            uploadButton.classList.toggle('hidden', !(isImageValid && isNameValid && isPriceValid && isQuantityValid && isCategorySelected));
+        }
+
+        productImage.addEventListener('change', checkFormValidity);
+        productName.addEventListener('input', checkFormValidity);
+        productPrice.addEventListener('input', checkFormValidity);
+        productQuantity.addEventListener('input', checkFormValidity);
+
+        function resetForm() {
+            document.getElementById('productForm').reset();
+            statusMessage.textContent = '';
+            imageName.textContent = '';
+            uploadButton.classList.add('hidden');
+            mainCategories.classList.remove('hidden');
+            subCategoriesElektronika.classList.add('hidden');
+            finalSubCategoriesSmartfonlar.classList.add('hidden');
+            selectedCategoryBox.classList.add('hidden');
+        }
+    });
+</script>
