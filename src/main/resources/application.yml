@@ -21,3 +21,7 @@ logging:
     org.springframework.security: DEBUG
     org.hibernate: DEBUG
     org.hibernate.SQL: DEBUG
+
+image:
+  upload:
+    dir: "/media/user/Новый том/Images"
