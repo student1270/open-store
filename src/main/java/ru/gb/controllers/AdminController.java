@@ -8,40 +8,50 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import ru.gb.service.ImageService;
+import ru.gb.model.Product;
+import ru.gb.service.ProductService;
 
-import java.io.IOException;
+import java.math.BigDecimal;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
 
-    @Autowired
-    private ImageService imageService;
 
+    @Autowired
+    private ProductService productService;
 
     @GetMapping
     public String showAdminPage(Model model) {
         model.addAttribute("title", "Admin Paneli");
         return "admin";
     }
+
     @GetMapping("/add-product")
-    public String showAddProductPage (Model model){
+    public String showAddProductPage(Model model) {
         model.addAttribute("title", "Mahsulot Qo‘shish");
         return "add-product";
     }
 
-
     @PostMapping("/add-product")
-    public String addProduct(@RequestParam("image")MultipartFile image , Model model) throws IOException {
-        if (imageService.uploadImage(image)) {
-            model.addAttribute("message", "Rasm muvaffaqiyatli yuklandi!");
+    public String addProduct(@RequestParam("name") String name,
+                             @RequestParam("price") String price,
+                             @RequestParam("quantity") String quantity,
+                             @RequestParam("description") String description,
+                             @RequestParam("image") MultipartFile image,
+                             @RequestParam("category") String category,
+                             Model model) {
+        Product product = new Product();
+        product.setName(name);
+        product.setPrice(new BigDecimal(price));
+        product.setStockQuantity(Integer.parseInt(quantity));
+        product.setDescription(description);
+
+        if (productService.saveProduct(product, image, category)) {
+            model.addAttribute("message", "Mahsulot muvaffaqiyatli qo'shildi!");
         } else {
-            model.addAttribute("message", "Rasm yuklashda xatolik yuz berdi!");
+            model.addAttribute("message", "Mahsulot qo'shishda xatolik yuz berdi!");
         }
         return "redirect:/admin/add-product";
-
     }
-
-
 }

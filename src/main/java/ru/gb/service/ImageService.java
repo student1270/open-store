@@ -12,50 +12,50 @@ import java.util.UUID;
 
 @Service
 public class ImageService {
-
     @Value("${image.upload.dir}")
     private String imageUploadDir;
 
     private final List<String> allowedFormats = Arrays.asList("png", "jpg", "jpeg", "tiff", "tif", "webp", "heif", "heic");
     private final long maxFileSize = 5 * 1024 * 1024;
 
-    public boolean uploadImage(MultipartFile image) {
+    public String uploadImage(MultipartFile image) {
         try {
             if (image == null || image.isEmpty()) {
-                return false;
+                return null;
             }
 
             String originalImageName = image.getOriginalFilename();
             if (originalImageName == null) {
-                return false;
+                return null;
             }
 
             int lastDotIndex = originalImageName.lastIndexOf(".");
             if (lastDotIndex == -1) {
-                return false;
+                return null;
             }
 
             String extension = originalImageName.substring(lastDotIndex + 1).toLowerCase();
             if (!allowedFormats.contains(extension)) {
-                return false;
+                return null;
             }
 
             if (image.getSize() > maxFileSize) {
-                return false;
+                return null;
             }
 
-
             File uploadDir = new File(imageUploadDir);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
 
             String fileName = UUID.randomUUID().toString() + "_" + originalImageName + System.currentTimeMillis();
             File destFile = new File(uploadDir, fileName);
 
             image.transferTo(destFile);
-            return true;
-
+            return fileName; // Fayl nomini qaytarish
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
     }
 }
