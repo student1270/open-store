@@ -52,6 +52,6 @@ public class AdminController {
         } else {
             model.addAttribute("message", "Mahsulot qo'shishda xatolik yuz berdi!");
         }
-        return "redirect:/admin/add-product";
+        return "redirect:/admin";
     }
 }
