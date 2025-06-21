@@ -2,7 +2,8 @@
 <html lang="uz" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${title}">OpenStore</title>
+    <title th:text="${title} ?: 'OpenStore'">OpenStore</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
             margin: 0;
@@ -65,12 +66,16 @@
             width: 300px;
         }
 
+        .catalog-menu.active {
+            display: block;
+        }
+
         .catalog-menu ul {
             list-style: none;
             padding: 0;
             margin: 0;
             display: flex;
-            flex-direction: column; /* Vertikal ko‘rinishda chiqaradi */
+            flex-direction: column;
             gap: 10px;
         }
 
@@ -88,7 +93,17 @@
             background-color: #f5f5f5;
         }
 
-        .catalog-menu .sub-menu {
+        .catalog-menu ul li a {
+            display: block;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .catalog-menu ul li a:hover {
+            background-color: #f5f5f5;
+        }
+
+        .sub-menu {
             display: none;
             position: absolute;
             top: 0;
@@ -126,7 +141,7 @@
     <script>
         function toggleCatalog() {
             var menu = document.getElementById("catalogMenu");
-            menu.style.display = (menu.style.display === "block") ? "none" : "block";
+            menu.classList.toggle("active");
         }
     </script>
 </head>
@@ -138,212 +153,17 @@
 
 <div id="catalogMenu" class="catalog-menu">
     <ul>
-        <li>Elektronika
-            <div class="sub-menu">
+        <li th:each="category : ${categories}" th:if="${category != null and category.parent == null}">
+            <span th:text="${category.categoryName} ?: 'Noma’lum kategoriya'">Kategoriya nomi</span>
+            <div class="sub-menu" th:unless="${#lists.isEmpty(category.children)}"> <!-- Lazy xatosini oldini olish -->
                 <ul>
-                    <li>Smartfonlar va telephone
-                        <div class="sub-menu">
+                    <li th:each="subCategory : ${category.children}" th:if="${subCategory != null}">
+                        <a th:href="@{/home/category/{id}(id=${subCategory.id})}" th:text="${subCategory.categoryName} ?: 'Noma’lum subkategoriya'">Subkategoriya nomi</a>
+                        <div class="sub-menu" th:unless="${#lists.isEmpty(subCategory.children)}">
                             <ul>
-                                <li>Smartfonlar</li>
-                                <li>Smartfonlar uchun aksessuarlar</li>
-                                <li>Knopkali telefonlar</li>
-                                <li>Ehtiyot qismlar va ta'mirlash</li>
-                                <li>Statsionar telefonlar</li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li>Noutbuklar, planshetlar va elektron kitoblar
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Noutbuklar</li>
-                                <li>Planshetlar va elektron kitoblar</li>
-                                <li>Noutbuk uchun aksessuarlar</li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li>Televizorlar va videotexnikalar
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Kabellar va adapterlar</li>
-                                <li>Televizorlar</li>
-                                <li>Tyuner va resiverlar</li>
-                                <li>Televizor aksessuarlari</li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </li>
-        <li>Maishiy texnika
-            <div class="sub-menu">
-                <ul>
-                    <li>Katta maishiy texnika
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Suv uchun kulerlar va aksessuarlar</li>
-                                <li>Oshxona dudburonlari</li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li>Uy uchun texnika
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Changyutgichlar va aksessuarlar</li>
-                                <li>Dazmollar va bugʻlagichlar</li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </li>
-        <li>Qurilish va ta'mirlash
-            <div class="sub-menu">
-                <ul>
-                    <li>Asboblar
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Elektr asboblar</li>
-                                <li>Kalitlar va otvyotkalar</li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li>Qurilish-pardoz materiallari
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Qurilish-pardoz ishlar uchun aksessuarlar va sarflov materiallari</li>
-                                <li>Laklar va Boʻyoqlar</li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </li>
-        <li>Poyabzallar
-            <div class="sub-menu">
-                <ul>
-                    <li>Erkaklar poyabzali
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Erkaklar krossovkalari</li>
-                                <li>Mokasinlar</li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li>Ayollar poyabzali
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Ayollar krossovkalari</li>
-                                <li>Tufli</li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </li>
-        <li>Salomatlik
-            <div class="sub-menu">
-                <ul>
-                    <li>Vitaminlar va BFQlar
-                        <div class="sub-menu">
-                            <ul>
-                                <li>A va E vitaminlari</li>
-                                <li>Ovqat hazm qilish tizimi uchun</li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li>Sportchilar uchun ozuqalar
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Gaynerlar va oqsillar</li>
-                                <li>BCAA va aminokislotalar</li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </li>
-        <li>Uy-roʻzgʻor buyumlari
-            <div class="sub-menu">
-                <ul>
-                    <li>Oshxona buyumlari
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Oshxona anjomlari</li>
-                                <li>Oziq-ovqat mahsulotlarini saqlash</li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li>Mebel
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Shkaflar, tumbalar, komodlar</li>
-                                <li>Poyabzal uchun javonlar</li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </li>
-        <li>Kiyim
-            <div class="sub-menu">
-                <ul>
-                    <li>Ayollar kiyimi
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Ichki kiyim</li>
-                                <li>Liboslar va sarafanlar</li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li>Erkaklar kiyimi
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Futbolkalar va polo</li>
-                                <li>Paypoqlar va getrlar</li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </li>
-        <li>Goʻzallik va parvarish
-            <div class="sub-menu">
-                <ul>
-                    <li>Makiyaj
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Koʻzlar</li>
-                                <li>Yuz</li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li>Yuz parvarishi
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Niqoblar</li>
-                                <li>Namlash va oziqlantirish</li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </li>
-        <li>Aksessuarlar
-            <div class="sub-menu">
-                <ul>
-                    <li>Ayollar aksessuarlari
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Bijuteriyalar</li>
-                                <li>Sumkalar va ryukzaklar</li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li>Erkaklar aksessuarlari
-                        <div class="sub-menu">
-                            <ul>
-                                <li>Koʻzoynak</li>
-                                <li>Soatlar va qayishlar</li>
+                                <li th:each="subSubCategory : ${subCategory.children}" th:if="${subSubCategory != null}">
+                                    <a th:href="@{/home/category/{id}(id=${subSubCategory.id})}" th:text="${subSubCategory.categoryName} ?: 'Noma’lum sub-subkategoriya'">Sub-subkategoriya nomi</a>
+                                </li>
                             </ul>
                         </div>
                     </li>

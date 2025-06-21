@@ -13,6 +13,8 @@ import org.springframework.security.config.annotation.authentication.configurati
 import ru.gb.model.Roles;
 import ru.gb.service.AdminDetailsService;
 
+import java.util.Objects;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -21,20 +23,29 @@ public class SecurityConfig {
     private static final String ROLE_ADMIN = Roles.ADMIN.getValue();
     private static final String ROLE_USER = Roles.USER.getValue();
 
-    private final AdminDetailsService userDetailsService; // Aniqlik kiritildi
+    private final AdminDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/css/**", "/", "/index", "/login").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/", "/index", "/login", "/home", "/home/**", "/error", "/favicon.ico").permitAll()
                         .requestMatchers("/user").hasRole(ROLE_USER)
-                        .requestMatchers("/admin").hasRole(ROLE_ADMIN)
+                        .requestMatchers("/admin").hasRole(ROLE_ADMIN) // Admin sahifasini cheklash
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/admin", true)
+                        .successHandler((request, response, authentication) -> {
+                            if (Objects.requireNonNull(authentication.getAuthorities().stream()
+                                    .filter(authority -> authority.getAuthority().equals("ROLE_" + ROLE_ADMIN))
+                                    .findFirst()
+                                    .orElse(null)) != null) {
+                                response.sendRedirect("/admin"); // Admin bo'lsa /admin ga
+                            } else {
+                                response.sendRedirect("/home"); // Boshqa holatda /home ga
+                            }
+                        })
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )

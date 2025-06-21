@@ -16,45 +16,37 @@ public class ImageService {
     private String imageUploadDir;
 
     private final List<String> allowedFormats = Arrays.asList("png", "jpg", "jpeg", "tiff", "tif", "webp", "heif", "heic");
-    private final long maxFileSize = 5 * 1024 * 1024;
+    private final long maxFileSize = 5 * 1024 * 1024; // 5 MB
 
     public String uploadImage(MultipartFile image) {
         try {
             if (image == null || image.isEmpty()) {
                 return null;
             }
-
             String originalImageName = image.getOriginalFilename();
             if (originalImageName == null) {
                 return null;
             }
-
             int lastDotIndex = originalImageName.lastIndexOf(".");
             if (lastDotIndex == -1) {
                 return null;
             }
-
             String extension = originalImageName.substring(lastDotIndex + 1).toLowerCase();
             if (!allowedFormats.contains(extension)) {
                 return null;
             }
-
             if (image.getSize() > maxFileSize) {
                 return null;
             }
-
             File uploadDir = new File(imageUploadDir);
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
             }
-
-            String fileName = UUID.randomUUID().toString() + "_" + originalImageName + System.currentTimeMillis();
+            String fileName = UUID.randomUUID().toString() + "." + extension;
             File destFile = new File(uploadDir, fileName);
-
             image.transferTo(destFile);
-            return fileName; // Fayl nomini qaytarish
+            return fileName;
         } catch (IOException e) {
-            e.printStackTrace();
             return null;
         }
     }

@@ -15,14 +15,12 @@ public class Category {
     private Long id;
 
     @Column(name = "category_name", length = 40, nullable = false)
-    private String categoryName; // name -> categoryName ga o'zgartirildi
+    private String categoryName;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
+    @JoinColumn(name = "parent_id", nullable = true)
     private Category parent;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Category> children = new ArrayList<>();
-
-    // Getter va setterlar avtomatik qo'shiladi (Lombok bilan)
 }

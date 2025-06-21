@@ -37,7 +37,7 @@ public class ProductService {
                     return false;
                 }
             }
-            product.setImagePath(imagePath); // ImagePath ni o‘rnatish
+            product.setImagePath(imagePath);
             productRepository.save(product);
             return true;
         }

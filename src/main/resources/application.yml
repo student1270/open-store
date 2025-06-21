@@ -1,6 +1,10 @@
 spring:
   application:
     name: open-store
+
+  web:
+    resources:
+      static-locations: "file:/media/user/Новый том/Images/,classpath:/static/"
   datasource:
     url: jdbc:mysql://localhost:3306/open_store_db
     username: root
@@ -16,12 +20,9 @@ spring:
       password: none
 server:
   port: 8083
-logging:
-  level:
-    org.springframework.security: DEBUG
-    org.hibernate: DEBUG
-    org.hibernate.SQL: DEBUG
+
 
 image:
   upload:
     dir: "/media/user/Новый том/Images"
+

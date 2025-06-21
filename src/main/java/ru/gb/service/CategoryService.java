@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import ru.gb.model.Category;
 import ru.gb.repository.CategoryRepository;
 
+import java.util.List;
+
 @Service
 public class CategoryService {
 
@@ -15,7 +17,7 @@ public class CategoryService {
         if (categoryPath == null || categoryPath.trim().isEmpty()) {
             return null;
         }
-        String[] parts = categoryPath.split(":");
+        String[] parts = categoryPath.split(":"); // Masalan, parts = ["elektronika", "smartfonlar va telefonlar", "Smartfonlar"];
         Category current = null;
         for (String part : parts) {
             Long parentId = current != null ? current.getId() : null;
@@ -38,5 +40,13 @@ public class CategoryService {
         Long parentId = parent != null ? parent.getId() : null;
         return categoryRepository.findByCategoryNameAndParentIdCustom(name, parentId)
                 .orElse(null);
+    }
+
+    public List<Category> findAll() {
+        return categoryRepository.findAll();
+    }
+
+    public Category findById(Long id) {
+        return categoryRepository.findById(id).orElse(null);
     }
 }
