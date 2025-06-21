@@ -16,7 +16,7 @@ public class ImageService {
     private String imageUploadDir;
 
     private final List<String> allowedFormats = Arrays.asList("png", "jpg", "jpeg", "tiff", "tif", "webp", "heif", "heic");
-    private final long maxFileSize = 5 * 1024 * 1024; // 5 MB
+    private final long maxFileSize = 5 * 1024 * 1024;
 
     public String uploadImage(MultipartFile image) {
         try {

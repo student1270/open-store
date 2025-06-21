@@ -23,4 +23,24 @@ public class ProductRetrievalService {
         }
         return products;
     }
+    public List<Product> findProductsByCategoryAndPriceAsc(Long categoryId){
+        if (categoryId == null) {
+            throw new IllegalArgumentException("Kategoriya ID si bo'sh bo'lmasligi kerak");
+        }
+        List<Product> products = productRetrievalRepository.findProductsByCategoryAndPriceAsc(categoryId);
+        if (products.isEmpty()) {
+            return products;
+        }
+        return products;
+    }
+    public List<Product> findProductsByCategoryAndPriceDesc(Long categoryId){
+        if (categoryId == null) {
+            throw new IllegalArgumentException("Kategoriya ID si bo'sh bo'lmasligi kerak");
+        }
+        List<Product> products = productRetrievalRepository.findProductsByCategoryAndPriceDesc(categoryId);
+        if (products.isEmpty()) {
+            return products;
+        }
+        return products;
+    }
 }
