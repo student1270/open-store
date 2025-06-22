@@ -29,9 +29,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/", "/index", "/login", "/home", "/home/**", "/error", "/favicon.ico").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/", "/index", "/login", "/home", "/home/**", "/error", "/favicon.ico" , "/product/" , "/product/**").permitAll()
                         .requestMatchers("/user").hasRole(ROLE_USER)
-                        .requestMatchers("/admin").hasRole(ROLE_ADMIN) // Admin sahifasini cheklash
+                        .requestMatchers("/admin").hasRole(ROLE_ADMIN)
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

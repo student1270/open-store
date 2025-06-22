@@ -19,7 +19,7 @@ public class Product {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
@@ -39,5 +39,11 @@ public class Product {
     @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @Column(name = "comment_count")
+    private Integer commentCount;
+
+    @Column(name = "rating" , nullable = false)
+    private double rating;
 
 }

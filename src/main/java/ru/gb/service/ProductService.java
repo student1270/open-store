@@ -8,6 +8,7 @@ import ru.gb.model.Product;
 import ru.gb.repository.ProductRepository;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -42,5 +43,8 @@ public class ProductService {
             return true;
         }
         return false;
+    }
+    public Product findProductsById(Long id){
+        return productRepository.findById(id).orElseThrow(()->new RuntimeException());
     }
 }

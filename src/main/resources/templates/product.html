@@ -14,8 +14,16 @@
 
         .product-container {
             max-width: 1200px;
-            margin: 60px auto 20px;
+            margin: 100px auto 20px;
             padding: 0 20px;
+        }
+
+        .category-title {
+            text-align: center;
+            font-size: 22px;
+            color: #222;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
 
         .category-info {
@@ -25,65 +33,18 @@
             color: #333;
         }
 
-        .sort-buttons {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .sort-dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .sort-main-btn {
-            padding: 8px 15px;
+        .breadcrumb {
+            text-align: center;
             font-size: 14px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            cursor: pointer;
-            color: #333;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .sort-main-btn:hover {
-            background-color: #007BFF;
-            color: #fff;
-        }
-
-        .sort-options {
-            display: none;
-            position: absolute;
-            top: 110%;
-            left: 0;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            min-width: 180px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-
-        .sort-options a {
-            display: block;
-            padding: 10px;
-            text-decoration: none;
-            color: #333;
-            font-size: 14px;
-            transition: background-color 0.3s;
-        }
-
-        .sort-options a:hover {
-            background-color: #f0f0f0;
+            margin-bottom: 10px;
+            color: #666;
         }
 
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* Har doim 4 ta ustun */
-            gap: 30px; /* Oraliq */
-            margin-top: 60px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin-top: 30px;
         }
 
         .product {
@@ -96,6 +57,8 @@
             align-items: center;
             padding: 10px;
             transition: transform 0.2s ease;
+            text-decoration: none;
+            color: inherit;
         }
 
         .product:hover {
@@ -129,6 +92,13 @@
             width: 100%;
         }
 
+        .rating {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin: 4px 0;
+        }
+
         .price {
             color: #007BFF;
             font-weight: bold;
@@ -136,7 +106,6 @@
             text-align: center;
         }
 
-        /* Responsivlik uchun */
         @media (max-width: 1024px) {
             .product-grid {
                 grid-template-columns: repeat(3, 1fr);
@@ -158,58 +127,28 @@
 </head>
 <body>
 
-<div th:if="${message}" class="message" th:text="${message}"></div>
-
 <div class="product-container">
+    <div class="category-title" th:text="${category.categoryName}">Kategoriya nomi</div>
+    <div class="breadcrumb" th:text="${breadcrumb}">Elektronika > Telefonlar > Smartfonlar</div>
     <div class="category-info" th:text="|Kategoriyada ${#lists.size(products)} ta mahsulot mavjud|"></div>
 
-    <div class="sort-buttons">
-        <div class="sort-dropdown">
-            <button class="sort-main-btn" onclick="toggleDropdown()"
-                    th:text="${sort == 'arzon' ? 'Arzonroq' :
-                              sort == 'qimmat' ? 'Qimmatroq' :
-                              sort == 'ommabop' ? 'Ommabop' :
-                              sort == 'buyurtma' ? 'Ko‘p buyurtirilgan' :
-                              'Yaqinda qo‘shilgan'}">
-                Avval ko‘rsatiladi
-                <i class="fa fa-chevron-down"></i>
-            </button>
-            <div id="sortOptions" class="sort-options">
-                <a th:href="@{/home/category/{id}(id=${category.id}, sort='ommabop')}">Ommabop</a>
-                <a th:href="@{/home/category/{id}(id=${category.id}, sort='arzon')}">Arzonroq</a>
-                <a th:href="@{/home/category/{id}(id=${category.id}, sort='qimmat')}">Qimmatroq</a>
-                <a th:href="@{/home/category/{id}(id=${category.id}, sort='buyurtma')}">Ko‘p buyurtirilgan</a>
-                <a th:href="@{/home/category/{id}(id=${category.id}, sort='yangi')}">Yaqinda qo‘shilgan</a>
-            </div>
-        </div>
-    </div>
-
     <div class="product-grid">
-        <div th:each="product : ${products}" class="product">
+        <a th:each="product : ${products}" th:href="@{/product/{id}(id=${product.id})}" class="product">
             <div class="image-wrapper">
                 <img th:src="@{/images/{imagePath}(imagePath=${product.imagePath})}" alt="Mahsulot rasmi">
             </div>
             <h3 th:text="${product.name}">Mahsulot nomi</h3>
+            <div class="rating">
+                <span th:if="${product.rating > 0}">&#9733;
+                    <span th:text="${#numbers.formatDecimal(product.rating, 1, 2)}"></span>
+                    (<span th:text="${product.commentCount} + ' ta sharh'"></span>)
+                </span>
+                <span th:unless="${product.rating > 0}">Hozircha baho yo‘q</span>
+            </div>
             <div class="price" th:text="|${product.price} so'm|">150 000 so'm</div>
-        </div>
+        </a>
     </div>
 </div>
-
-<script>
-    function toggleDropdown() {
-        var dropdown = document.getElementById("sortOptions");
-        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-    }
-
-    window.onclick = function(event) {
-        if (!event.target.matches('.sort-main-btn')) {
-            var dropdowns = document.getElementsByClassName("sort-options");
-            for (var i = 0; i < dropdowns.length; i++) {
-                dropdowns[i].style.display = "none";
-            }
-        }
-    }
-</script>
 
 </body>
 </html>

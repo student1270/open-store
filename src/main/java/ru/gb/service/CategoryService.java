@@ -17,7 +17,7 @@ public class CategoryService {
         if (categoryPath == null || categoryPath.trim().isEmpty()) {
             return null;
         }
-        String[] parts = categoryPath.split(":"); // Masalan, parts = ["elektronika", "smartfonlar va telefonlar", "Smartfonlar"];
+        String[] parts = categoryPath.split(":");
         Category current = null;
         for (String part : parts) {
             Long parentId = current != null ? current.getId() : null;
