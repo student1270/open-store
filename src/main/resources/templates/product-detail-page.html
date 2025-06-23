@@ -87,7 +87,7 @@
             text-align: center;
         }
 
-        .cart-controls {
+        .cart-form {
             margin-top: 30px;
             display: flex;
             justify-content: center;
@@ -95,37 +95,22 @@
             gap: 10px;
         }
 
-        .cart-btn, .quantity-btn {
+        .cart-btn {
             padding: 8px 15px;
             border: none;
             border-radius: 6px;
             font-size: 14px;
             cursor: pointer;
-        }
-
-        .cart-btn {
             background-color: blueviolet;
             color: white;
         }
 
-        .quantity-box {
-            display: flex;
-            align-items: center;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            padding: 4px 10px;
+        .quantity-input {
+            padding: 6px 10px;
             font-size: 16px;
-        }
-
-        .quantity-btn {
-            background-color: white;
-            border: none;
-            font-size: 18px;
-        }
-
-        .quantity-value {
-            margin: 0 10px;
-            min-width: 20px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            width: 70px;
             text-align: center;
         }
     </style>
@@ -164,46 +149,17 @@
         2025-06-22 13:00
     </div>
 
-    <!-- 🛒 Savatga qo‘shish va miqdor boshqaruvi -->
-    <div class="cart-controls">
-        <button class="cart-btn" onclick="showQuantityControls()">Savatga qo‘shish</button>
 
-        <div id="quantityControls" class="quantity-box" style="display: none;">
-            <button class="quantity-btn" onclick="decreaseQuantity()">−</button>
-            <span class="quantity-value" id="quantityValue">1</span>
-            <button class="quantity-btn" onclick="increaseQuantity()">+</button>
-            <button class="cart-btn" style="margin-left: 10px;">Savatda<br>O‘tish</button>
-        </div>
-    </div>
+    <form class="cart-form" action="/cart/add" method="post">
+        <input type="hidden" name="productId" th:value="${productDetailPage.id}" />
+
+        <label for="quantity">Nechta olmoqchisiz:</label>
+        <input class="quantity-input" type="number" name="quantity" id="quantity"
+               value="1" min="1" th:attr="max=${productDetailPage.stockQuantity}" required />
+
+        <button type="submit" class="cart-btn">Savatga qo‘shish</button>
+    </form>
 </div>
-
-<script>
-    let quantity = 1;
-    const maxQuantity = /*[[${productDetailPage.stockQuantity}]]*/ 10; // Thymeleaf will set actual value
-
-    function showQuantityControls() {
-        document.querySelector('.cart-btn').style.display = 'none';
-        document.getElementById('quantityControls').style.display = 'flex';
-    }
-
-    function increaseQuantity() {
-        if (quantity < maxQuantity) {
-            quantity++;
-            document.getElementById('quantityValue').textContent = quantity;
-        }
-    }
-
-    function decreaseQuantity() {
-        if (quantity > 1) {
-            quantity--;
-            document.getElementById('quantityValue').textContent = quantity;
-        } else {
-            quantity = 1;
-            document.querySelector('.cart-btn').style.display = 'inline-block';
-            document.getElementById('quantityControls').style.display = 'none';
-        }
-    }
-</script>
 
 </body>
 </html>
