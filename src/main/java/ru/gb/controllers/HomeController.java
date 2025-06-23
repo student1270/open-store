@@ -11,7 +11,7 @@ import ru.gb.service.CategoryService;
 
 import java.util.List;
 
-/*
+
 @Controller
 public class HomeController {
 
@@ -25,7 +25,7 @@ public class HomeController {
         return "home";
     }
 }
-*/
+/*
 @RestController
 @RequestMapping("/api")
 public class HomeController {
@@ -38,3 +38,4 @@ public class HomeController {
         return categoryService.findAll();
     }
 }
+*/

@@ -1,5 +1,5 @@
 package ru.gb.controllers;
-/*
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -58,7 +58,7 @@ public class AdminController {
 }
 
 
- */
+ /*
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -100,5 +100,5 @@ public class AdminController{
 
 
 }
-
+*/
 
