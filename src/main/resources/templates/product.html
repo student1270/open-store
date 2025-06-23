@@ -40,6 +40,60 @@
             color: #666;
         }
 
+        .sort-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .sort-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .sort-main-btn {
+            padding: 8px 15px;
+            font-size: 14px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .sort-main-btn:hover {
+            background-color: #007BFF;
+            color: #fff;
+        }
+
+        .sort-options {
+            display: none;
+            position: absolute;
+            top: 110%;
+            left: 0;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            min-width: 180px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .sort-options a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .sort-options a:hover {
+            background-color: #f0f0f0;
+        }
+
         .product-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -132,6 +186,28 @@
     <div class="breadcrumb" th:text="${breadcrumb}">Elektronika > Telefonlar > Smartfonlar</div>
     <div class="category-info" th:text="|Kategoriyada ${#lists.size(products)} ta mahsulot mavjud|"></div>
 
+    <!-- 🔽 Saralash tugmasi -->
+    <div class="sort-buttons">
+        <div class="sort-dropdown">
+            <button class="sort-main-btn" onclick="toggleDropdown()"
+                    th:text="${sort == 'arzon' ? 'Arzonroq' :
+                              sort == 'qimmat' ? 'Qimmatroq' :
+                              sort == 'ommabop' ? 'Ommabop' :
+                              sort == 'buyurtma' ? 'Ko‘p buyurtirilgan' :
+                              'Yaqinda qo‘shilgan'}">
+                Avval ko‘rsatiladi
+                <i class="fa fa-chevron-down"></i>
+            </button>
+            <div id="sortOptions" class="sort-options">
+                <a th:href="@{/home/category/{id}(id=${category.id}, sort='ommabop')}">Ommabop</a>
+                <a th:href="@{/home/category/{id}(id=${category.id}, sort='arzon')}">Arzonroq</a>
+                <a th:href="@{/home/category/{id}(id=${category.id}, sort='qimmat')}">Qimmatroq</a>
+                <a th:href="@{/home/category/{id}(id=${category.id}, sort='buyurtma')}">Ko‘p buyurtirilgan</a>
+                <a th:href="@{/home/category/{id}(id=${category.id}, sort='yangi')}">Yaqinda qo‘shilgan</a>
+            </div>
+        </div>
+    </div>
+
     <div class="product-grid">
         <a th:each="product : ${products}" th:href="@{/product/{id}(id=${product.id})}" class="product">
             <div class="image-wrapper">
@@ -149,6 +225,22 @@
         </a>
     </div>
 </div>
+
+<script>
+    function toggleDropdown() {
+        var dropdown = document.getElementById("sortOptions");
+        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    }
+
+    window.onclick = function(event) {
+        if (!event.target.matches('.sort-main-btn')) {
+            var dropdowns = document.getElementsByClassName("sort-options");
+            for (var i = 0; i < dropdowns.length; i++) {
+                dropdowns[i].style.display = "none";
+            }
+        }
+    }
+</script>
 
 </body>
 </html>

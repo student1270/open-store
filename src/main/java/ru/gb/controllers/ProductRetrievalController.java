@@ -1,6 +1,15 @@
 package ru.gb.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ru.gb.model.Product;
+import ru.gb.service.ProductRetrievalService;
+
+import java.util.List;
+
+/*
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -61,3 +70,34 @@ public class ProductRetrievalController {
         return "redirect:/home";
     }
 }
+*/
+@RestController
+@RequestMapping("/api/products")
+public class ProductRetrievalController{
+    @Autowired
+    private ProductRetrievalService productRetrievalService;
+
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<?> getProductsByCategory(@PathVariable Long categoryId , @RequestParam(value = "sort" , required = false) String sort){
+        try{
+            List<Product> products;
+            switch(sort!= null ? sort : ""){
+                case "Arzon":
+                    products = productRetrievalService.findProductsByCategoryAndPriceAsc(categoryId);
+                    break;
+                case "Qimmat":
+                    products = productRetrievalService.findProductsByCategoryAndPriceDesc(categoryId);
+                    break;
+                default:
+                    products = productRetrievalService.findProductsByCategory(categoryId);
+                    break;
+            }
+            return ResponseEntity.ok(products);
+        }
+        catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().body("Kategoriyani Id si noto'g'ri");
+        }
+    }
+
+}
+

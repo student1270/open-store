@@ -45,6 +45,6 @@ public class ProductService {
         return false;
     }
     public Product findProductsById(Long id){
-        return productRepository.findById(id).orElseThrow(()->new RuntimeException());
+        return productRepository.findById(id).orElseThrow(RuntimeException::new);
     }
 }
