@@ -146,23 +146,29 @@
     </script>
 </head>
 <body>
+
+<!-- HEADER -->
 <header>
-    <button onclick="toggleCatalog()" class="catalog-button">Katalog</button>
+    <div style="display: flex; gap: 10px;">
+        <button onclick="toggleCatalog()" class="catalog-button">Katalog</button>
+        <a th:href="@{/cart}" class="login-button">Savat</a>
+    </div>
     <a th:href="@{/login}" class="login-button">Kirish</a>
 </header>
 
+<!-- KATALOG MENU -->
 <div id="catalogMenu" class="catalog-menu">
     <ul>
         <li th:each="category : ${categories}" th:if="${category != null and category.parent == null}">
             <span th:text="${category.categoryName} ?: 'Noma’lum kategoriya'">Kategoriya nomi</span>
-            <div class="sub-menu" th:unless="${#lists.isEmpty(category.children)}"> <!-- Lazy xatosini oldini olish -->
+            <div class="sub-menu" th:unless="${#lists.isEmpty(category.children)}">
                 <ul>
                     <li th:each="subCategory : ${category.children}" th:if="${subCategory != null}">
-                        <a th:href="@{/home/category/{id}(id=${subCategory.id})}" th:text="${subCategory.categoryName} ?: 'Noma’lum subkategoriya'">Subkategoriya nomi</a>
+                        <a th:href="@{/home/category/{id}(id=${subCategory.id})}" th:text="${subCategory.categoryName} ?: 'Noma’lum subkategoriya'">Subkategoriya</a>
                         <div class="sub-menu" th:unless="${#lists.isEmpty(subCategory.children)}">
                             <ul>
                                 <li th:each="subSubCategory : ${subCategory.children}" th:if="${subSubCategory != null}">
-                                    <a th:href="@{/home/category/{id}(id=${subSubCategory.id})}" th:text="${subSubCategory.categoryName} ?: 'Noma’lum sub-subkategoriya'">Sub-subkategoriya nomi</a>
+                                    <a th:href="@{/home/category/{id}(id=${subSubCategory.id})}" th:text="${subSubCategory.categoryName} ?: 'Noma’lum sub-subkategoriya'">Sub-subkategoriya</a>
                                 </li>
                             </ul>
                         </div>
@@ -172,5 +178,6 @@
         </li>
     </ul>
 </div>
+
 </body>
 </html>
