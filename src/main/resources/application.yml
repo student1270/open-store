@@ -26,3 +26,9 @@ image:
   upload:
     dir: "/media/user/Новый том/Images"
 
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+    ru.gb:
