@@ -5,22 +5,40 @@ spring:
   web:
     resources:
       static-locations: "file:/media/user/Новый том/Images/,classpath:/static/"
+
   datasource:
     url: jdbc:mysql://localhost:3306/open_store_db
     username: root
     password: 1224
+
   jpa:
     hibernate:
       ddl-auto: validate
     show-sql: true
     open-in-view: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: abdugafforkabiljanov@gmail.com
+    password: oyce fgvn ruuw dszz
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connection timeout: 5000
+          timeout: 5000
+          write timeout: 5000
+
   security:
     user:
       name: none
       password: none
+
 server:
   port: 8083
-
 
 image:
   upload:
@@ -28,7 +46,10 @@ image:
 
 logging:
   level:
-    org:
-      springframework:
-        security: DEBUG
-    ru.gb:
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.mail: DEBUG
+    ru.gb: TRACE
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type: TRACE
+#

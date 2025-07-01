@@ -18,6 +18,8 @@ public class HomeController {
     @Autowired
     private CategoryService categoryService;
 
+
+
     @GetMapping({"/", "/home"})
     public String homePage(Model model) {
         model.addAttribute("title", "OpenStore - Bosh sahifa");

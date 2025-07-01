@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uz" xmlns:th="http://www.thymeleaf.org">
+<html lang="uz" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title th:text="${title} ?: 'OpenStore'">OpenStore</title>
@@ -29,11 +29,12 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         .catalog-button:hover {
             background-color: #00a64d;
+            transform: scale(1.05);
         }
 
         .login-button {
@@ -45,11 +46,88 @@
             font-size: 16px;
             font-weight: bold;
             text-decoration: none;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         .login-button:hover {
             background-color: #3730a3;
+            transform: scale(1.05);
+        }
+
+        .logout-button {
+            background-color: #ef4444;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .cart-button {
+            background-color: #f97316;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .cart-button:hover {
+            background-color: #ea580c;
+            transform: scale(1.05);
+        }
+
+        .register-button {
+            background: linear-gradient(90deg, #ec4899, #db2777);
+            color: white;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .register-button:hover {
+            background: linear-gradient(90deg, #db2777, #ec4899);
+            transform: scale(1.05);
+        }
+
+        .admin-login-link {
+            color: #4f46e5;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: color 0.3s ease, transform 0.2s ease;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .admin-login-link:hover {
+            color: #3730a3;
+            transform: scale(1.05);
+        }
+
+        .user-phone {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            background-color: #f3f4f6;
+            border-radius: 6px;
         }
 
         .catalog-menu {
@@ -94,13 +172,8 @@
         }
 
         .catalog-menu ul li a {
-            display: block;
             text-decoration: none;
             color: #333;
-        }
-
-        .catalog-menu ul li a:hover {
-            background-color: #f5f5f5;
         }
 
         .sub-menu {
@@ -121,11 +194,11 @@
         }
 
         .sub-menu ul {
+            padding: 0;
+            margin: 0;
             display: flex;
             flex-direction: column;
             gap: 5px;
-            padding: 0;
-            margin: 0;
         }
 
         .sub-menu li {
@@ -151,9 +224,23 @@
 <header>
     <div style="display: flex; gap: 10px;">
         <button onclick="toggleCatalog()" class="catalog-button">Katalog</button>
-        <a th:href="@{/cart}" class="login-button">Savat</a>
+        <a th:href="@{/cart}" class="cart-button">Savat</a>
     </div>
-    <a th:href="@{/login}" class="login-button">Kirish</a>
+    <div style="display: flex; gap: 15px; flex-direction: column; align-items: flex-end;">
+        <div sec:authorize="isAuthenticated()">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span class="user-phone" th:text="'+998 ' + ${#authentication.name}"></span>
+                <a th:href="@{/logout}" class="logout-button">Chiqish</a>
+            </div>
+        </div>
+        <div sec:authorize="isAnonymous()">
+            <div style="display: flex; gap: 15px;">
+                <a th:href="@{/login}" class="login-button">Kirish</a>
+                <a th:href="@{/register}" class="register-button">Ro‘yxatdan o‘tish</a>
+            </div>
+        </div>
+        <a th:href="@{/admin-login}" class="admin-login-link">Adminlar uchun kirish</a>
+    </div>
 </header>
 
 <!-- KATALOG MENU -->
@@ -177,6 +264,13 @@
             </div>
         </li>
     </ul>
+</div>
+
+<!-- ASOSIY KONTENT -->
+<div style="padding: 20px;">
+    <!-- Bu yerda asosiy kontent bo'ladi -->
+    <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">Xush kelibsiz!</h1>
+    <p>Bu sizning asosiy sahifangiz. Katalog tugmasi orqali mahsulotlarni ko'rishingiz mumkin.</p>
 </div>
 
 </body>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uz" xmlns:th="http://www.thymeleaf.org">
+<html lang="uz" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title th:text="${productDetailPage.name}">Mahsulot nomi</title>
@@ -11,6 +11,7 @@
             background-color: #f9f9f9;
             padding: 20px;
         }
+
         header {
             background-color: #fff;
             padding: 15px 30px;
@@ -19,6 +20,7 @@
             align-items: center;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
+
         .catalog-button {
             background-color: #00c853;
             color: white;
@@ -28,11 +30,14 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
+
         .catalog-button:hover {
             background-color: #00a64d;
+            transform: scale(1.05);
         }
+
         .login-button {
             background-color: #4f46e5;
             color: white;
@@ -42,11 +47,64 @@
             font-size: 16px;
             font-weight: bold;
             text-decoration: none;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
+
         .login-button:hover {
             background-color: #3730a3;
+            transform: scale(1.05);
         }
+
+        .cart-button {
+            background-color: #f97316;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .cart-button:hover {
+            background-color: #ea580c;
+            transform: scale(1.05);
+        }
+
+        .register-button {
+            background: linear-gradient(90deg, #ec4899, #db2777);
+            color: white;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .register-button:hover {
+            background: linear-gradient(90deg, #db2777, #ec4899);
+            transform: scale(1.05);
+        }
+
+        .admin-login-link {
+            color: #4f46e5;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: color 0.3s ease, transform 0.2s ease;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .admin-login-link:hover {
+            color: #3730a3;
+            transform: scale(1.05);
+        }
+
         .catalog-menu {
             display: none;
             position: absolute;
@@ -60,9 +118,11 @@
             z-index: 1000;
             width: 300px;
         }
+
         .catalog-menu.active {
             display: block;
         }
+
         .catalog-menu ul {
             list-style: none;
             padding: 0;
@@ -71,6 +131,7 @@
             flex-direction: column;
             gap: 10px;
         }
+
         .catalog-menu ul li {
             position: relative;
             padding: 10px 15px;
@@ -80,13 +141,16 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
         .catalog-menu ul li:hover {
             background-color: #f5f5f5;
         }
+
         .catalog-menu ul li a {
             text-decoration: none;
             color: #333;
         }
+
         .sub-menu {
             display: none;
             position: absolute;
@@ -99,9 +163,11 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             min-width: 250px;
         }
+
         .catalog-menu ul li:hover > .sub-menu {
             display: block;
         }
+
         .sub-menu ul {
             padding: 0;
             margin: 0;
@@ -109,14 +175,17 @@
             flex-direction: column;
             gap: 5px;
         }
+
         .sub-menu li {
             padding: 8px 12px;
             background-color: white;
             border-radius: 4px;
         }
+
         .sub-menu li:hover {
             background-color: #f0f0f0;
         }
+
         .container {
             max-width: 1100px;
             margin: auto;
@@ -126,32 +195,38 @@
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
+
         .breadcrumb {
             color: #888;
             font-size: 14px;
             margin-bottom: 15px;
         }
+
         .product-name {
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 10px;
             color: #222;
         }
+
         .product-meta {
             font-size: 14px;
             color: #666;
             margin-bottom: 20px;
         }
+
         .star {
             color: #FFD700;
             font-size: 14px;
             margin-right: 4px;
         }
+
         .image-section {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
         }
+
         .image-section img {
             max-width: 350px;
             max-height: 350px;
@@ -159,6 +234,7 @@
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
+
         .price {
             text-align: center;
             font-size: 22px;
@@ -166,23 +242,27 @@
             color: #007BFF;
             margin-top: 20px;
         }
+
         .stock {
             text-align: center;
             margin-top: 10px;
             color: #28a745;
             font-weight: 500;
         }
+
         .description {
             margin-top: 25px;
             font-size: 16px;
             color: #333;
         }
+
         .created-at {
             margin-top: 10px;
             font-size: 12px;
             color: #999;
             text-align: center;
         }
+
         .cart-form {
             margin-top: 30px;
             display: flex;
@@ -190,6 +270,7 @@
             align-items: center;
             gap: 10px;
         }
+
         .cart-btn {
             padding: 8px 15px;
             border: none;
@@ -199,6 +280,7 @@
             background-color: blueviolet;
             color: white;
         }
+
         .quantity-input {
             padding: 6px 10px;
             font-size: 16px;
@@ -216,13 +298,23 @@
     </script>
 </head>
 <body>
+
+<!-- HEADER -->
 <header>
     <div style="display: flex; gap: 10px;">
         <button onclick="toggleCatalog()" class="catalog-button">Katalog</button>
-        <a th:href="@{/cart}" class="login-button">Savat</a>
+        <a th:href="@{/cart}" class="cart-button">Savat</a>
     </div>
-    <a th:href="@{/login}" class="login-button">Kirish</a>
+    <div style="display: flex; gap: 15px; flex-direction: column; align-items: flex-end;">
+        <div style="display: flex; gap: 15px;">
+            <a th:href="@{/login}" class="login-button">Kirish</a>
+            <a th:href="@{/register}" class="register-button" sec:authorize="isAnonymous()">Ro‘yxatdan o‘tish</a>
+        </div>
+        <a th:href="@{/admin-login}" class="admin-login-link">Adminlar uchun kirish</a>
+    </div>
 </header>
+
+<!-- KATALOG MENU -->
 <div id="catalogMenu" class="catalog-menu">
     <ul>
         <li th:each="category : ${categories}" th:if="${category != null and category.parent == null}">
@@ -230,11 +322,11 @@
             <div class="sub-menu" th:unless="${#lists.isEmpty(category.children)}">
                 <ul>
                     <li th:each="subCategory : ${category.children}" th:if="${subCategory != null}">
-                        <a th:href="@{/home/category/{id}(id=${subCategory.id})}" th:text="${subCategory.categoryName}">Subkategoriya</a>
+                        <a th:href="@{/home/category/{id}(id=${subCategory.id})}" th:text="${subCategory.categoryName} ?: 'Noma’lum subkategoriya'">Subkategoriya</a>
                         <div class="sub-menu" th:unless="${#lists.isEmpty(subCategory.children)}">
                             <ul>
                                 <li th:each="subSubCategory : ${subCategory.children}" th:if="${subSubCategory != null}">
-                                    <a th:href="@{/home/category/{id}(id=${subSubCategory.id})}" th:text="${subSubCategory.categoryName}">Sub-subkategoriya</a>
+                                    <a th:href="@{/home/category/{id}(id=${subSubCategory.id})}" th:text="${subSubCategory.categoryName} ?: 'Noma’lum sub-subkategoriya'">Sub-subkategoriya</a>
                                 </li>
                             </ul>
                         </div>
@@ -244,6 +336,8 @@
         </li>
     </ul>
 </div>
+
+<!-- MAHSULOT TAVSIFI -->
 <div class="container">
     <div class="breadcrumb"
          th:text="${productDetailPage.category != null ? productDetailPage.category.categoryName : 'Kategoriya mavjud emas'}">

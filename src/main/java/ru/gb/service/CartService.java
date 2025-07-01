@@ -29,7 +29,7 @@ public class CartService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Long userId;
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-            User user = userRepository.findByUsername(auth.getName()).orElse(null);
+            User user = userRepository.findByEmailAddress(auth.getName()).orElse(null); // Username o‘rniga email
             if (user != null) {
                 userId = user.getId();
             } else {
