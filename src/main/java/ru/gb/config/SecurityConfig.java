@@ -1,44 +1,55 @@
 package ru.gb.config;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import ru.gb.model.Roles;
-import ru.gb.service.UserService;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
     private static final String ROLE_ADMIN = Roles.ADMIN.getValue().replace("ROLE_", "");
     private static final String ROLE_USER = Roles.USER.getValue().replace("ROLE_", "");
 
-    private final UserService userDetailsService;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/", "/index", "/login", "/admin-login",
-                                "/home", "/home/**", "/error", "/favicon.ico", "/product/", "/product/**",
-                                "/cart", "/cart/**").permitAll()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/", "/index",
+                                "/login", "/admin-login", "/home", "/home/**", "/error",
+                                "/favicon.ico", "/product/**", "/cart", "/cart/add").permitAll()
                         .requestMatchers("/api/**").permitAll()
-                        .requestMatchers("/register", "/register/**", "/check-user-details").anonymous()
+                        .requestMatchers("/register/**", "/check-user-details").anonymous()
                         .requestMatchers("/user").hasRole(ROLE_USER)
                         .requestMatchers("/admin").hasRole(ROLE_ADMIN)
-                        .requestMatchers("/checkout").hasRole(ROLE_USER)
+                        .requestMatchers("/cart/checkout", "/cart/confirm").hasRole(ROLE_USER)
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .defaultSuccessUrl("/home", true)
+                        .successHandler((request, response, authentication) -> {
+                            HttpSession session = request.getSession(false);
+                            log.info("Login successful. User: {}, Session ID: {}",
+                                    authentication.getName(), session != null ? session.getId() : "null");
+                            String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
+                            if (redirectUrl != null) {
+                                session.removeAttribute("redirectAfterLogin");
+                                response.sendRedirect(redirectUrl);
+                            } else {
+                                response.sendRedirect("/home");
+                            }
+                        })
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -49,14 +60,14 @@ public class SecurityConfig {
                 )
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .ignoringRequestMatchers("/api/**") // API uchun CSRF ni o'chirish
+                        .ignoringRequestMatchers("/api/**")
+                )
+                .sessionManagement(session -> session
+                        .sessionFixation().migrateSession()
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false)
                 );
 
         return http.build();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
     }
 }

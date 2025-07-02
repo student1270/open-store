@@ -37,4 +37,8 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VerificationCode> verificationCodes;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Roles role;
 }
