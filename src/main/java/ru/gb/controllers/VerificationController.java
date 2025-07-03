@@ -1,11 +1,14 @@
 package ru.gb.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.gb.model.User;
@@ -19,6 +22,8 @@ import java.util.Optional;
 @Controller
 @RequestMapping
 public class VerificationController {
+
+    private static final Logger log = LoggerFactory.getLogger(VerificationController.class);
 
     @Autowired
     private VerificationService verificationService;
@@ -35,13 +40,16 @@ public class VerificationController {
     public ResponseEntity<?> checkEmail(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         if (email == null || email.isBlank()) {
+            log.warn("Noto‘g‘ri email kiritildi: {}", email);
             return ResponseEntity.badRequest().body(new CheckEmailResponse(false, "Email manzili yuborilmadi."));
         }
 
         Optional<User> user = verificationService.findUserByEmail(email);
         if (user.isPresent()) {
+            log.info("Email topildi: {}", email);
             return ResponseEntity.ok().body(new CheckEmailResponse(true, "Email topildi."));
         }
+        log.warn("Email topilmadi: {}", email);
         return ResponseEntity.badRequest().body(new CheckEmailResponse(false, "Email topilmadi."));
     }
 
@@ -49,14 +57,17 @@ public class VerificationController {
     public ResponseEntity<?> sendVerificationCode(@RequestBody Map<String, String> payload, HttpServletRequest request) {
         String email = payload.get("email");
         if (email == null || email.isBlank()) {
+            log.warn("Noto‘g‘ri email kiritildi: {}", email);
             return ResponseEntity.badRequest().body(new SendSmsResponse(false, "Email manzili yuborilmadi.", null));
         }
 
         try {
             LocalDateTime expiryDate = verificationService.requestVerificationCode(email, request);
-            String expiryDateStr = expiryDate.toString(); // format: "2025-07-01T15:03:24"
+            String expiryDateStr = expiryDate.toString();
+            log.info("Tasdiqlash kodi yuborildi: email={}, expiry={}", email, expiryDateStr);
             return ResponseEntity.ok().body(new SendSmsResponse(true, "Tasdiqlash kodi yuborildi.", expiryDateStr));
         } catch (RuntimeException e) {
+            log.error("SMS yuborishda xato: {}", e.getMessage());
             return ResponseEntity.badRequest().body(new SendSmsResponse(false, e.getMessage(), null));
         }
     }
@@ -67,6 +78,7 @@ public class VerificationController {
         String code = payload.get("code");
 
         if (email == null || email.isBlank() || code == null || code.isBlank()) {
+            log.warn("Noto‘g‘ri ma’lumot: email={}, code={}", email, code);
             return ResponseEntity.badRequest().body(new VerifySmsResponse(false, "Email yoki kod yuborilmadi."));
         }
 
@@ -78,11 +90,16 @@ public class VerificationController {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                // Sessiyaga autentifikatsiyani saqlash
+                request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+                log.info("Foydalanuvchi autentifikatsiya qilindi: email={}, roli={}", email, userDetails.getAuthorities());
                 return ResponseEntity.ok().body(new VerifySmsResponse(true, "Kod tasdiqlandi, tizimga kirish muvaffaqiyatli."));
             }
+            log.warn("Foydalanuvchi topilmadi: email={}", email);
             return ResponseEntity.badRequest().body(new VerifySmsResponse(false, "Foydalanuvchi topilmadi."));
         }
-        return ResponseEntity.badRequest().body(new VerifySmsResponse(false, "Noto'g'ri yoki muddati o'tgan kod."));
+        log.warn("Noto‘g‘ri yoki muddati o‘tgan kod: email={}, code={}", email, code);
+        return ResponseEntity.badRequest().body(new VerifySmsResponse(false, "Noto‘g‘ri yoki muddati o‘tgan kod."));
     }
 
     // Javob modellari
@@ -102,7 +119,7 @@ public class VerificationController {
     static class SendSmsResponse {
         boolean success;
         String message;
-        String expiryDate; // LocalDateTime o‘rniga String
+        String expiryDate;
 
         public SendSmsResponse(boolean success, String message, String expiryDate) {
             this.success = success;

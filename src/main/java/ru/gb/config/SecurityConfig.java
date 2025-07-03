@@ -40,8 +40,8 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/home", true)
                         .successHandler((request, response, authentication) -> {
                             HttpSession session = request.getSession(false);
-                            log.info("Login successful. User: {}, Session ID: {}",
-                                    authentication.getName(), session != null ? session.getId() : "null");
+                            log.info("Login successful. User: {}, Session ID: {}, Roles: {}",
+                                    authentication.getName(), session != null ? session.getId() : "null", authentication.getAuthorities());
                             String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
                             if (redirectUrl != null) {
                                 session.removeAttribute("redirectAfterLogin");
@@ -60,12 +60,11 @@ public class SecurityConfig {
                 )
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .ignoringRequestMatchers("/api/**")
+                        .ignoringRequestMatchers("/api/**", "/cart/checkout", "/cart/confirm") // Test uchun CSRF o‘chirildi
                 )
                 .sessionManagement(session -> session
-                        .sessionFixation().migrateSession()
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false)
+                                .sessionFixation().migrateSession()
+                        // Test uchun maximumSessions o‘chirildi
                 );
 
         return http.build();

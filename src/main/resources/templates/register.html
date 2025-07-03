@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hisob Yaratish - Open Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        /* Stil qismi siz yozgancha qolgan */
+        /* Mavjud stillar saqlanadi */
         * {
             margin: 0;
             padding: 0;
@@ -97,6 +98,47 @@
             margin-top: 0.5rem;
             display: none;
         }
+        /* Yangi dizayn stillari */
+        .login-link-container {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        .login-link-text {
+            color: #34495e;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .login-link {
+            color: #3498db;
+            font-weight: 600;
+            text-decoration: none;
+            position: relative;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+        .login-link:hover {
+            color: #1d4ed8;
+            transform: translateX(5px);
+        }
+        .login-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background: linear-gradient(90deg, #3498db, #1d4ed8);
+            transition: width 0.3s ease;
+        }
+        .login-link:hover::after {
+            width: 100%;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -128,6 +170,12 @@
         </div>
 
         <button type="submit" class="create-button">Hisob Yaratish</button>
+
+        <!-- Yangi qism -->
+        <div class="login-link-container fade-in">
+            <span class="login-link-text">Ro'yhatdan o'tganmisiz? </span>
+            <a href="/login" class="login-link">Tizimga kirish</a>
+        </div>
     </form>
 </div>
 

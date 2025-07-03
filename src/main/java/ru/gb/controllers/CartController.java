@@ -53,6 +53,7 @@ public class CartController {
         if (authentication != null && authentication.isAuthenticated() && !(authentication.getPrincipal() instanceof String)) {
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
             Long userId = userDetails.getUser().getId();
+            log.info("Savat ko‘rinishi: User ID: {}, Email: {}, Roles: {}", userId, userDetails.getUsername(), authentication.getAuthorities());
             Cart sessionCart = (Cart) session.getAttribute("cart");
             if (sessionCart != null && !sessionCart.getItems().isEmpty()) {
                 Cart dbCart = cartRepository.findByUserId(userId).orElseGet(() -> {
@@ -65,6 +66,8 @@ public class CartController {
                 }
                 session.removeAttribute("cart");
             }
+        } else {
+            log.info("Savat ko‘rinishi: Foydalanuvchi autentifikatsiya qilinmagan");
         }
 
         List<CartProduct> cartItems = cartService.getCartItems(session);
@@ -102,16 +105,48 @@ public class CartController {
     @PostMapping("/checkout")
     public String checkout(HttpSession session, RedirectAttributes redirectAttributes) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        log.info("Checkout called. Session ID: {}, Authentication: {}, IsAuthenticated: {}, Principal: {}",
+        log.info("Checkout so‘rovi. Sessiya ID: {}, Autentifikatsiya: {}, IsAuthenticated: {}, Rollar: {}, Principal: {}",
                 session.getId(),
                 auth != null ? auth.getName() : "null",
-                auth != null ? auth.isAuthenticated() : false,
+                auth != null && auth.isAuthenticated(),
+                auth != null ? auth.getAuthorities() : "null",
+                auth != null ? auth.getPrincipal() : "null");
+
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() instanceof String) {
+            log.warn("Foydalanuvchi autentifikatsiya qilinmagan, /login sahifasiga yo‘naltirilmoqda. Sessiya ID: {}", session.getId());
+            session.setAttribute("redirectAfterLogin", "/cart");
+            redirectAttributes.addFlashAttribute("error", "Xaridni amalga oshirish uchun tizimga kiring!");
+            return "redirect:/login";
+        }
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Roles role = userDetails.getUser().getRole();
+        log.info("Foydalanuvchi autentifikatsiya qilindi. User ID: {}, Rol: {}, Email: {}",
+                userDetails.getUser().getId(), role, userDetails.getUsername());
+
+        if (!Roles.USER.equals(role)) {
+            log.warn("Foydalanuvchi roli USER emas: {}", role);
+            redirectAttributes.addFlashAttribute("error", "Faqat oddiy foydalanuvchilar xarid qilishi mumkin.");
+            return "redirect:/cart";
+        }
+
+        return "confirm-checkout";
+    }
+
+
+    @PostMapping("/confirm")
+    public String confirmPurchase(HttpSession session, RedirectAttributes redirectAttributes) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        log.info("Confirm request. Session ID: {}, Authentication: {}, IsAuthenticated: {}, Roles: {}, Principal: {}",
+                session.getId(),
+                auth != null ? auth.getName() : "null",
+                auth != null && auth.isAuthenticated(),
+                auth != null ? auth.getAuthorities() : "null",
                 auth != null ? auth.getPrincipal() : "null");
 
         if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() instanceof String) {
             log.warn("User not authenticated, redirecting to login. Session ID: {}", session.getId());
-            session.setAttribute("redirectAfterLogin", "/cart");
-            redirectAttributes.addFlashAttribute("error", "Xaridni amalga oshirish uchun tizimga kiring!");
+            redirectAttributes.addFlashAttribute("error", "Xaridni tasdiqlash uchun tizimga kiring!");
             return "redirect:/login";
         }
 
@@ -121,29 +156,19 @@ public class CartController {
                 userDetails.getUser().getId(), role, userDetails.getUsername());
 
         if (!Roles.USER.equals(role)) {
+            log.warn("User role is not USER: {}", role);
             redirectAttributes.addFlashAttribute("error", "Faqat oddiy foydalanuvchilar xarid qilishi mumkin.");
             return "redirect:/cart";
         }
 
-        return "confirm-checkout";
-    }
-    @PostMapping("/confirm")
-    public String confirmPurchase(HttpSession session, RedirectAttributes redirectAttributes) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        log.info("Confirm purchase called. Authentication: {}, IsAuthenticated: {}, Principal: {}",
-                auth != null ? auth.getName() : "null",
-                auth != null ? auth.isAuthenticated() : false,
-                auth != null ? auth.getPrincipal() : "null");
-
-        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() instanceof String) {
-            log.warn("User not authenticated, redirecting to login. Session ID: {}", session.getId());
-            redirectAttributes.addFlashAttribute("error", "Xaridni tasdiqlash uchun tizimga kiring!");
-            return "redirect:/login";
+        boolean purchaseConfirmed = cartService.confirmPurchase(session);
+        if (purchaseConfirmed) {
+            redirectAttributes.addFlashAttribute("success", "Xarid muvaffaqiyatli amalga oshirildi!");
+            return "redirect:/home";
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Xaridni amalga oshirishda xatolik: Omborda yetarli mahsulot yo‘q yoki savat bo‘sh!");
+            return "redirect:/cart";
         }
-
-        cartService.clearCart(session);
-        redirectAttributes.addFlashAttribute("success", "Xarid muvaffaqiyatli amalga oshirildi!");
-        return "redirect:/home";
     }
 
     @PostMapping("/cancel")

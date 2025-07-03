@@ -20,19 +20,20 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Roles role = user.getRole();
+        if (role == null) {
+            throw new IllegalStateException("Foydalanuvchi roli null bo‘lmasligi kerak!");
+        }
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
     public String getPassword() {
-        // siz User modelida password yo‘q dedingiz, agar password saqlanmasa, bu xatolik beradi
-        // lekin agar qo‘shilgan bo‘lsa (tavsiya qilinadi), bu metod ishlaydi
-        throw new UnsupportedOperationException("Parol mavjud emas. User modelida 'password' maydonini qo‘shing.");
+        return null; // Parolsiz tizim uchun null qaytariladi
     }
 
     @Override
     public String getUsername() {
-        return user.getEmailAddress(); // email orqali login bo‘lsa
+        return user.getEmailAddress();
     }
 
     @Override

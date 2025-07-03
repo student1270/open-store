@@ -5,10 +5,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import ru.gb.model.Roles;
 import ru.gb.model.User;
 import ru.gb.repository.UserRepository;
-
-
+import ru.gb.service.impl.UserDetailsImpl;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +46,10 @@ public class UserService implements UserDetailsService {
 
         if (checkName && checkSurname && checkEmailAddress && checkPhoneNumber) {
             user.setPhoneNumber(cleanedPhone);
+            // Role ni avtomatik USER sifatida o'rnatish
+            if (user.getRole() == null) {
+                user.setRole(Roles.USER); // Roles.USER enum qiymati
+            }
             userRepository.save(user);
             return true;
         } else {
@@ -57,11 +61,6 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmailAddress(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Foydalanuvchi topilmadi: " + email));
-
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmailAddress())  // Email asosida autentifikatsiya
-                .password("")  // Parol kerak bo'lmasa bo'sh qoldiring
-                .roles("USER")
-                .build();
+        return new UserDetailsImpl(user);
     }
 }

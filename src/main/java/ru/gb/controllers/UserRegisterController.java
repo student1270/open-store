@@ -30,8 +30,7 @@ public class UserRegisterController {
     @PostMapping("/register")
     public String handleRegister(@ModelAttribute("user") User user, Model model) {
         if (userService.saveUser(user)) {
-
-            UserDetails userDetails = userService.loadUserByUsername(user.getPhoneNumber());
+            UserDetails userDetails = userService.loadUserByUsername(user.getEmailAddress());
             Authentication auth = new UsernamePasswordAuthenticationToken(
                     userDetails,
                     null,

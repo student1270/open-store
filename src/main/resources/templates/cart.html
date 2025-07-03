@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Savat</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
@@ -222,27 +224,28 @@
         }
 
         function showConfirmModal() {
-            // CSRF token olish
-            const csrfToken = document.querySelector('input[name="_csrf"]').value;
-            const csrfHeader = "X-CSRF-TOKEN"; // Bu yer o‘zgartirildi
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content || "X-CSRF-TOKEN";
 
             fetch('/cart/checkout', {
                 method: 'POST',
-                credentials: 'same-origin', // Cookie'larni olish uchun
+                credentials: 'same-origin',
                 headers: {
-                    'Accept': 'text/html', // HTML javobini kutish
-                    [csrfHeader]: csrfToken // X-CSRF-TOKEN sarlavhasi kerak
+                    'Accept': 'text/html',
+                    [csrfHeader]: csrfToken
                 }
             })
                 .then(response => {
+                    console.log('Javob holati:', response.status);
                     if (response.status === 403 || response.status === 401) {
-                        window.location.href = "/login"; // login sahifasiga yo‘naltirish
+                        console.error('CSRF yoki autentifikatsiya xatosi');
+                        window.location.href = "/login";
                         return;
                     }
                     if (!response.ok) {
                         throw new Error('Server xatosi: ' + response.status);
                     }
-                    return response.text(); // confirm-checkout sahifasi
+                    return response.text();
                 })
                 .then(data => {
                     const modalContainer = document.getElementById('modalContainer');
@@ -261,7 +264,6 @@
             modalContainer.innerHTML = '';
         }
 
-        // Sahifa yuklanganda showModal atributini tekshirish
         window.onload = function() {
             const showModal = /*[[${showModal}]]*/ false;
             if (showModal) {

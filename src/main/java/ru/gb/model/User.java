@@ -22,12 +22,11 @@ public class User {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "email_address" , nullable = false , unique = true)
+    @Column(name = "email_address", nullable = false, unique = true)
     private String emailAddress;
 
-    @Column(name = "phone_number" , nullable = false , unique = true)
+    @Column(name = "phone_number", nullable = false, unique = true)
     @Pattern(regexp = "\\d{9}", message = "Telefon raqam faqat 9 ta raqamdan iborat bo‘lishi kerak")
-
     private String phoneNumber;
 
     @Column(name = "registered_at", nullable = false, updatable = false)
@@ -39,6 +38,7 @@ public class User {
     private List<VerificationCode> verificationCodes;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "role", nullable = false)
     private Roles role;
+
 }
