@@ -10,13 +10,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.gb.model.Cart;
 import ru.gb.model.CartProduct;
+import ru.gb.model.Order;
 import ru.gb.model.Product;
 import ru.gb.model.User;
 import ru.gb.repository.CartProductRepository;
 import ru.gb.repository.CartRepository;
 import ru.gb.repository.ProductRepository;
 import ru.gb.repository.UserRepository;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,17 +32,18 @@ public class CartService {
     private final CartProductService cartProductService;
     private final CartProductRepository cartProductRepository;
     private final UserRepository userRepository;
+    private final OrderService orderService;
 
     @Transactional
     public Cart getOrCreateCart(HttpSession session) {
         log.info("Getting or creating cart for session: {}", session.getId());
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        final Long userId; // final deb belgiladik
+        final Long userId;
 
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             User user = userRepository.findByEmailAddress(auth.getName()).orElse(null);
             if (user != null) {
-                userId = user.getId(); // Bir marta aniqlanadi
+                userId = user.getId();
                 if (userId == null) {
                     log.warn("User found but userId is null: Email: {}", auth.getName());
                 } else {
@@ -50,7 +51,7 @@ public class CartService {
                 }
             } else {
                 log.warn("User not found in database: Email: {}", auth.getName());
-                userId = null; // Agar user topilmasa, null qilamiz
+                userId = null;
             }
         } else {
             log.debug("No authenticated user found, using session cart");
@@ -61,7 +62,7 @@ public class CartService {
             Cart cart = cartRepository.findByUserId(userId)
                     .orElseGet(() -> {
                         Cart newCart = new Cart();
-                        newCart.setUserId(userId); // final userId ishlatiladi
+                        newCart.setUserId(userId);
                         Cart savedCart = cartRepository.save(newCart);
                         log.debug("Created new cart for user: Cart ID: {}, User ID: {}", savedCart.getId(), userId);
                         return savedCart;
@@ -128,7 +129,31 @@ public class CartService {
             return false;
         }
 
-        // Mahsulotlarning mavjudligini tekshirish
+        // Foydalanuvchi ma'lumotlarini olish
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByEmailAddress(auth.getName()).orElse(null);
+        if (user == null) {
+            log.warn("User not found for purchase confirmation: Email: {}", auth.getName());
+            return false;
+        }
+
+        // Yangi buyurtma yaratish
+        Order order = orderService.createOrder(
+                user.getId(),
+                user.getSurname(),
+                user.getName(),
+                user.getEmailAddress(),
+                cartItems.get(0).getProduct().getCategory().getCategoryName()
+        );
+        log.debug("Created order: Order ID: {}", order.getId());
+
+        // Savatdagi elementlarni buyurtmaga qo'shish
+        for (CartProduct item : cartItems) {
+            orderService.addItemToOrder(order, item.getProduct().getId(), item.getQuantity());
+            log.debug("Added item to order: Product ID: {}, Quantity: {}", item.getProduct().getId(), item.getQuantity());
+        }
+
+        // Mahsulotlarning mavjudligini tekshirish va stokni yangilash
         for (CartProduct item : cartItems) {
             Product product = item.getProduct();
             int requestedQuantity = item.getQuantity();
@@ -139,19 +164,15 @@ public class CartService {
                         product.getId(), availableQuantity, requestedQuantity);
                 return false; // Agar yetarli mahsulot bo'lmasa, xarid bekor qilinadi
             }
-        }
-        for (CartProduct item : cartItems) {
-            Product product = item.getProduct();
-            int newQuantity = product.getStockQuantity() - item.getQuantity();
+            int newQuantity = availableQuantity - requestedQuantity;
             product.setStockQuantity(newQuantity);
             productRepository.save(product);
-            log.debug("Updated stock for product: Product ID: {}, New Stock: {}",
-                    product.getId(), newQuantity);
+            log.debug("Updated stock for product: Product ID: {}, New Stock: {}", product.getId(), newQuantity);
         }
 
         // Savatni tozalash
         clearCart(session);
-        log.info("Purchase confirmed and cart cleared for session: {}", session.getId());
+        log.info("Purchase confirmed, order saved, and cart cleared for session: {}", session.getId());
         return true;
     }
 

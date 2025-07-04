@@ -306,13 +306,14 @@
         <a th:href="@{/cart}" class="cart-button">Savat</a>
     </div>
     <div style="display: flex; gap: 15px; flex-direction: column; align-items: flex-end;">
-        <div style="display: flex; gap: 15px;">
+        <div sec:authorize="isAnonymous()" style="display: flex; gap: 15px;">
             <a th:href="@{/login}" class="login-button">Kirish</a>
-            <a th:href="@{/register}" class="register-button" sec:authorize="isAnonymous()">Ro‘yxatdan o‘tish</a>
+            <a th:href="@{/register}" class="register-button">Ro‘yxatdan o‘tish</a>
         </div>
-        <a th:href="@{/admin-login}" class="admin-login-link">Adminlar uchun kirish</a>
+        <a th:href="@{/admin-login}" class="admin-login-link" sec:authorize="isAnonymous()">Adminlar uchun kirish</a>
     </div>
 </header>
+
 
 <!-- KATALOG MENU -->
 <div id="catalogMenu" class="catalog-menu">

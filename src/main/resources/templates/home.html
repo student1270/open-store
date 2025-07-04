@@ -229,7 +229,7 @@
     <div style="display: flex; gap: 15px; flex-direction: column; align-items: flex-end;">
         <div sec:authorize="isAuthenticated()">
             <div style="display: flex; align-items: center; gap: 15px;">
-                <span class="user-phone" th:text="'+998 ' + ${#authentication.name}"></span>
+                <span class="user-phone" th:text="${#authentication.principal.user.name} ?: 'Noma’lum foydalanuvchi'"></span>
                 <a th:href="@{/logout}" class="logout-button">Chiqish</a>
             </div>
         </div>
