@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/", "/index",
                                 "/login", "/admin-login", "/home", "/home/**", "/error",
-                                "/favicon.ico", "/product/**", "/cart", "/cart/add").permitAll()
+                                "/favicon.ico", "/product/**", "/cart", "/cart/add" , "/{productId}/reviews" , "/reviews" , "/reviews/**").permitAll()
                         .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/register/**", "/check-user-details").anonymous()
                         .requestMatchers("/user").hasRole(ROLE_USER)

@@ -308,7 +308,7 @@
     <div style="display: flex; gap: 15px; flex-direction: column; align-items: flex-end;">
         <div sec:authorize="isAnonymous()" style="display: flex; gap: 15px;">
             <a th:href="@{/login}" class="login-button">Kirish</a>
-            <a th:href="@{/register}" class="register-button">Ro‘yxatdan o‘tish</a>
+            <a th:href="@{/register}" class="register-button">Ro'yxatdan o'tish</a>
         </div>
         <a th:href="@{/admin-login}" class="admin-login-link" sec:authorize="isAnonymous()">Adminlar uchun kirish</a>
     </div>
@@ -319,15 +319,15 @@
 <div id="catalogMenu" class="catalog-menu">
     <ul>
         <li th:each="category : ${categories}" th:if="${category != null and category.parent == null}">
-            <span th:text="${category.categoryName} ?: 'Noma’lum kategoriya'">Kategoriya nomi</span>
+            <span th:text="${category.categoryName} ?: 'Noma'lum kategoriya'">Kategoriya nomi</span>
             <div class="sub-menu" th:unless="${#lists.isEmpty(category.children)}">
                 <ul>
                     <li th:each="subCategory : ${category.children}" th:if="${subCategory != null}">
-                        <a th:href="@{/home/category/{id}(id=${subCategory.id})}" th:text="${subCategory.categoryName} ?: 'Noma’lum subkategoriya'">Subkategoriya</a>
+                        <a th:href="@{/home/category/{id}(id=${subCategory.id})}" th:text="${subCategory.categoryName} ?: 'Noma'lum subkategoriya'">Subkategoriya</a>
                         <div class="sub-menu" th:unless="${#lists.isEmpty(subCategory.children)}">
                             <ul>
-                                <li th:each="subSubCategory : ${subCategory.children}" th:if="${subSubCategory != null}">
-                                    <a th:href="@{/home/category/{id}(id=${subSubCategory.id})}" th:text="${subSubCategory.categoryName} ?: 'Noma’lum sub-subkategoriya'">Sub-subkategoriya</a>
+                                <li th:each="subSubCategory : ${subSubCategory.children}" th:if="${subSubCategory != null}">
+                                    <a th:href="@{/home/category/{id}(id=${subSubCategory.id})}" th:text="${subSubCategory.categoryName} ?: 'Noma'lum sub-subkategoriya'">Sub-subkategoriya</a>
                                 </li>
                             </ul>
                         </div>
@@ -357,7 +357,7 @@
     <div class="price" th:text="|${productDetailPage.price} so'm|">1 000 000 so'm</div>
     <div class="stock" th:text="|Omborda: ${productDetailPage.stockQuantity} dona mavjud|">Omborda mavjud</div>
     <div class="description" th:text="${productDetailPage.description}">
-        Mahsulot haqida tavsif shu yerda bo‘ladi.
+        Mahsulot haqida tavsif shu yerda bo'ladi.
     </div>
     <div class="created-at"
          th:text="|Yuklangan sana: ${#temporals.format(productDetailPage.createdAt, 'yyyy-MM-dd HH:mm')}|">
@@ -369,8 +369,94 @@
         <label for="quantity">Nechta olmoqchisiz:</label>
         <input class="quantity-input" type="number" name="quantity" id="quantity"
                value="1" min="1" th:attr="max=${productDetailPage.stockQuantity}" required />
-        <button type="submit" class="cart-btn">Savatga qo‘shish</button>
+        <button type="submit" class="cart-btn">Savatga qo'shish</button>
     </form>
 </div>
+
+<!-- SHARHLAR QISMI -->
+<div class="container mt-10">
+    <h2 class="text-xl font-semibold mb-4">Foydalanuvchi izohlari</h2>
+
+    <div class="flex justify-between items-center mb-4">
+        <button onclick="prevReviews()" class="px-3 py-2 bg-gray-200 rounded-full hover:bg-gray-300">&#8592;</button>
+
+        <div id="review-slider" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full px-4">
+            <div th:each="review : ${latestTwoReviews}" class="border rounded-lg p-4 bg-white shadow">
+                <div class="text-sm text-gray-500 mb-1" th:text="${review.username}">Foydalanuvchi</div>
+                <div class="text-xs text-gray-400 mb-2"
+                     th:text="${#temporals.format(review.localDateTime, 'yyyy-MM-dd HH:mm')}">Sana</div>
+                <div class="text-yellow-500 mb-2">
+                    <span th:each="i : ${#numbers.sequence(1, 5)}"
+                          th:text="${i <= review.rating ? '★' : '☆'}"></span>
+                </div>
+                <p><strong>Izoh:</strong> <span th:text="${review.comment}">Bu yerda izoh</span></p>
+            </div>
+        </div>
+
+        <button onclick="nextReviews()" class="px-3 py-2 bg-gray-200 rounded-full hover:bg-gray-300">&#8594;</button>
+    </div>
+
+    <div class="text-center">
+        <a th:href="@{/product/{id}/reviews(id=${productDetailPage.id})}" class="block text-blue-600 font-semibold hover:underline bg-gray-100 py-2 rounded">
+            Hamma sharhlarni ko'rish
+        </a>
+    </div>
+</div>
+
+<script>
+    const reviews = [
+        <th:block th:each="review : ${latestTwoReviews}">
+            {
+                id: [[${review.id}]],
+                user: "[[${review.username}]]",
+                date: "[[${#temporals.format(review.localDateTime, 'yyyy-MM-dd HH:mm')}]]",
+                rating: [[${review.rating}]],
+                comment: "[[${review.comment}]]"
+            },
+        </th:block>
+    ];
+
+    let currentIndex = 0;
+    const perPage = 2;
+
+    function renderReviews() {
+        const slider = document.getElementById("review-slider");
+        slider.innerHTML = "";
+
+        const end = Math.min(currentIndex + perPage, reviews.length);
+        const visibleReviews = reviews.slice(currentIndex, end);
+
+        for (const review of visibleReviews) {
+            const stars = Array(5).fill('☆').map((s, i) => i < review.rating ? '★' : '☆').join('');
+
+            const reviewHtml = `
+                <div class="border rounded-lg p-4 bg-white shadow">
+                    <div class="text-sm text-gray-500 mb-1">${review.user}</div>
+                    <div class="text-xs text-gray-400 mb-2">${review.date}</div>
+                    <div class="text-yellow-500 mb-2">${stars}</div>
+                    <p><strong>Izoh:</strong> ${review.comment}</p>
+                </div>
+            `;
+            slider.innerHTML += reviewHtml;
+        }
+    }
+
+    function nextReviews() {
+        if (currentIndex + perPage < reviews.length) {
+            currentIndex += perPage;
+            renderReviews();
+        }
+    }
+
+    function prevReviews() {
+        if (currentIndex - perPage >= 0) {
+            currentIndex -= perPage;
+            renderReviews();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", renderReviews);
+</script>
+
 </body>
 </html>
