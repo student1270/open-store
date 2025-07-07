@@ -129,7 +129,7 @@ public class CartService {
             return false;
         }
 
-        // Foydalanuvchi ma'lumotlarini olish
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByEmailAddress(auth.getName()).orElse(null);
         if (user == null) {
@@ -137,7 +137,7 @@ public class CartService {
             return false;
         }
 
-        // Yangi buyurtma yaratish
+
         Order order = orderService.createOrder(
                 user.getId(),
                 user.getSurname(),
@@ -147,13 +147,13 @@ public class CartService {
         );
         log.debug("Created order: Order ID: {}", order.getId());
 
-        // Savatdagi elementlarni buyurtmaga qo'shish
+
         for (CartProduct item : cartItems) {
             orderService.addItemToOrder(order, item.getProduct().getId(), item.getQuantity());
             log.debug("Added item to order: Product ID: {}, Quantity: {}", item.getProduct().getId(), item.getQuantity());
         }
 
-        // Mahsulotlarning mavjudligini tekshirish va stokni yangilash
+
         for (CartProduct item : cartItems) {
             Product product = item.getProduct();
             int requestedQuantity = item.getQuantity();
@@ -162,7 +162,7 @@ public class CartService {
             if (availableQuantity < requestedQuantity) {
                 log.warn("Insufficient stock for product: Product ID: {}, Available: {}, Requested: {}",
                         product.getId(), availableQuantity, requestedQuantity);
-                return false; // Agar yetarli mahsulot bo'lmasa, xarid bekor qilinadi
+                return false;
             }
             int newQuantity = availableQuantity - requestedQuantity;
             product.setStockQuantity(newQuantity);
@@ -170,7 +170,7 @@ public class CartService {
             log.debug("Updated stock for product: Product ID: {}, New Stock: {}", product.getId(), newQuantity);
         }
 
-        // Savatni tozalash
+
         clearCart(session);
         log.info("Purchase confirmed, order saved, and cart cleared for session: {}", session.getId());
         return true;

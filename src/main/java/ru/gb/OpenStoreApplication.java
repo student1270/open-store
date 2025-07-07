@@ -10,3 +10,4 @@ public class OpenStoreApplication {
 	}
 
 }
+// https://yunsc.uz/uzb/page9.html

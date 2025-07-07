@@ -175,90 +175,102 @@
 
         if (section === "buyurtmalar") {
             filterContainer.innerHTML = `
-        <div style="display: flex; gap: 10px;">
-          <button class="filter-btn" id="btn-barcha" onclick="showBuyurtma('barcha', this)">Barcha buyurtmalar</button>
-          <button class="filter-btn" onclick="showBuyurtma('tolov', this)">To‘lov qilinmagan</button>
-          <button class="filter-btn" onclick="showBuyurtma('faol', this)">Faol</button>
-        </div>
-      `;
-            // Avtomatik birinchi tugmani bosish
+                <div style="display: flex; gap: 10px;">
+                  <button class="filter-btn" id="btn-barcha" onclick="showBuyurtma('barcha', this)">Barcha buyurtmalar</button>
+                  <button class="filter-btn" onclick="showBuyurtma('tolov', this)">To‘lov qilinmagan</button>
+                  <button class="filter-btn" onclick="showBuyurtma('faol', this)">Faol</button>
+                </div>
+            `;
             const btn = document.getElementById("btn-barcha");
             showBuyurtma('barcha', btn);
         } else if (section === "sharhlar") {
             filterContainer.innerHTML = `
-        <div class="subheading">Mening Sharhlarim</div>
-        <div style="display: flex; gap: 10px;">
-          <button class="filter-btn" id="btn-kutyapti" onclick="showSharh('kutyapti', this)">Baholashni kutyapti</button>
-          <button class="filter-btn" onclick="showSharh('baholangan', this)">Baholangan</button>
-        </div>
-      `;
+                <div class="subheading">Mening Sharhlarim</div>
+                <div style="display: flex; gap: 10px;">
+                  <button class="filter-btn" id="btn-kutyapti" onclick="showSharh('kutyapti', this)">Baholashni kutyapti</button>
+                  <button class="filter-btn" onclick="showSharh('baholangan', this)">Baholangan</button>
+                </div>
+            `;
             const btn = document.getElementById("btn-kutyapti");
             showSharh('kutyapti', btn);
         } else if (section === "malumot") {
             contentArea.innerHTML = `
-        <div class="card" style="text-align: left;">
-          <h2 class="subheading">Maʼlumotlarim</h2>
-          <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-            <div style="flex: 1 1 200px;">
-              <label>Familiya*</label><br>
-              <input type="text" id="surname" value="Qobiljonov">
-            </div>
-            <div style="flex: 1 1 200px;">
-              <label>Ism*</label><br>
-              <input type="text" id="name" value="Abdug'affor">
-            </div>
-            <div style="flex: 1 1 200px;">
-              <label>Email*</label><br>
-              <input type="email" id="email" value="example@mail.com" disabled>
-            </div>
-            <div style="flex: 1 1 200px;">
-              <label>Telefon raqami*</label><br>
-              <input type="tel" id="phone" value="+998 94 000-00-00" disabled>
-            </div>
-            <div style="flex: 1 1 200px;">
-              <label>Ro‘yxatdan o‘tgan vaqt</label><br>
-              <input type="text" value="2024-01-15 13:45:00" disabled>
-            </div>
-            <div style="flex: 1 1 200px;">
-              <label>Rol</label><br>
-              <input type="text" value="USER" disabled>
-            </div>
-          </div>
-          <div style="margin-top: 30px; text-align: center;">
-            <button onclick="saveUserData()" class="btn-back">Saqlash</button>
-          </div>
-        </div>
-      `;
+                <div class="card" style="text-align: left;">
+                  <h2 class="subheading">Maʼlumotlarim</h2>
+                  <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                    <div style="flex: 1 1 200px;">
+                      <label>Familiya*</label><br>
+                      <input type="text" id="surname" value="Qobiljonov">
+                    </div>
+                    <div style="flex: 1 1 200px;">
+                      <label>Ism*</label><br>
+                      <input type="text" id="name" value="Abdug'affor">
+                    </div>
+                    <div style="flex: 1 1 200px;">
+                      <label>Email*</label><br>
+                      <input type="email" id="email" value="example@mail.com" disabled>
+                    </div>
+                    <div style="flex: 1 1 200px;">
+                      <label>Telefon raqami*</label><br>
+                      <input type="tel" id="phone" value="+998 94 000-00-00" disabled>
+                    </div>
+                    <div style="flex: 1 1 200px;">
+                      <label>Ro‘yxatdan o‘tgan vaqt</label><br>
+                      <input type="text" value="2024-01-15 13:45:00" disabled>
+                    </div>
+                    <div style="flex: 1 1 200px;">
+                      <label>Rol</label><br>
+                      <input type="text" value="USER" disabled>
+                    </div>
+                  </div>
+                  <div style="margin-top: 30px; text-align: center;">
+                    <button onclick="saveUserData()" class="btn-back">Saqlash</button>
+                  </div>
+                </div>
+            `;
         }
     }
 
     function showBuyurtma(type, btn) {
         setActiveButton(btn);
-        let text = "";
 
-        if (type === "barcha") {
-            text = "Sizda <strong>buyurtmalar</strong> mavjud emas!";
+        const orderCard = `
+            <div style="text-align: left; border: 1px solid #ccc; border-radius: 8px; padding: 20px;">
+                <div style="font-weight: bold; font-size: 16px;">Buyurtma ID raqami 60361643</div>
+                <div style="margin-top: 10px; color: #555;">
+                    <span style="font-weight: bold;">Holat:</span>
+                    <span style="background-color: #eee; padding: 3px 8px; border-radius: 6px; font-weight: bold;">Xaridorga berilgan</span>
+                    <span style="font-size: 12px; color: #888;">&nbsp;&nbsp;Yangi holat: 2025-06-01 14:27</span>
+                </div>
+                <div style="margin-top: 10px;"><strong>Yetkazib berish sanasi:</strong> Yakshanba, 1 Iyun</div>
+                <div><strong>Topshirish punkti:</strong> Toshkent sh., Yunusobod 7 dahasi, 39A uy</div>
+                <div style="margin-top: 10px;"><strong>Buyurtma sanasi:</strong> Shanba, 31 May 2025 22:02</div>
+                <div><strong>Buyurtma qiymati:</strong> 54 000 so'm</div>
+                <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px; font-size: 14px;">
+                    1 mahsulot
+                </div>
+            </div>
+        `;
+
+        if (type === "barcha" || type === "faol") {
+            contentArea.innerHTML = orderCard;
         } else if (type === "tolov") {
-            text = "Sizda <strong>to‘lov qilinmagan</strong> buyurtma mavjud emas!";
-        } else {
-            text = "Sizda <strong>faol</strong> buyurtma mavjud emas!";
+            contentArea.innerHTML = `
+                <h2>Hech narsa yo‘q</h2>
+                <p>Sizda <strong>to‘lov qilinmagan</strong> buyurtma mavjud emas!<br>Barcha kerakli narsalarni topish uchun qidirishdan foydalaning!</p>
+                <a href="#" class="btn-back">Bosh sahifaga qaytish</a>
+            `;
         }
-
-        contentArea.innerHTML = `
-      <h2>Hech narsa yo‘q</h2>
-      <p>${text}<br>Barcha kerakli narsalarni topish uchun qidirishdan foydalaning!</p>
-      <a href="#" class="btn-back">Bosh sahifaga qaytish</a>
-    `;
     }
 
     function showSharh(type, btn) {
         setActiveButton(btn);
         contentArea.innerHTML = `
-      <img src="https://cdn-icons-png.flaticon.com/512/7461/7461739.png" class="review-img" alt="Review Cat" />
-      <h2>Xarid qilgandan keyin bu yerda baholash uchun tovarlar paydo bo‘ladi</h2>
-      <p>Taassurotlar bilan bo‘lishing — bu boshqa xaridorlarga tanlashda yordam beradi</p>
-      <a href="#" class="btn-back">Bosh sahifa</a>
-    `;
+            <img src="https://cdn-icons-png.flaticon.com/512/7461/7461739.png" class="review-img" alt="Review Cat" />
+            <h2>Xarid qilgandan keyin bu yerda baholash uchun tovarlar paydo bo‘ladi</h2>
+            <p>Taassurotlar bilan bo‘lishing — bu boshqa xaridorlarga tanlashda yordam beradi</p>
+            <a href="#" class="btn-back">Bosh sahifa</a>
+        `;
     }
 
     function setActiveButton(btn) {
@@ -274,10 +286,8 @@
         };
         console.log("Yangi maʼlumotlar:", data);
         alert("Familiya va ism saqlandi (demo).");
-        // fetch('/api/user/update', { method: 'POST', body: JSON.stringify(data), headers: {'Content-Type': 'application/json'} })
     }
 
-    // Sahifa yuklanganda avtomatik buyurtmalar ochilsin
     window.onload = () => selectSection('buyurtmalar');
 </script>
 </body>

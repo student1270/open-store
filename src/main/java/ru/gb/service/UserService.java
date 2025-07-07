@@ -46,7 +46,7 @@ public class UserService implements UserDetailsService {
 
         if (checkName && checkSurname && checkEmailAddress && checkPhoneNumber) {
             user.setPhoneNumber(cleanedPhone);
-            // Role ni avtomatik USER sifatida o'rnatish
+
             if (user.getRole() == null) {
                 user.setRole(Roles.USER); // Roles.USER enum qiymati
             }

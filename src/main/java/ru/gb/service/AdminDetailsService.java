@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.gb.model.Admin;
 import ru.gb.repository.AdminRepository;
+import ru.gb.service.impl.AdminDetails;
 
 @Service
 @RequiredArgsConstructor
@@ -20,11 +21,8 @@ public class AdminDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Admin admin = adminRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Foydalanuvchi '" + username + "' topilmadi"));
-        return User
-                .withUsername(admin.getUsername())
-                .password(admin.getPassword())
-                .authorities(ROLE_PREFIX + admin.getRole().getValue())
-                .build();
+                .orElseThrow(() -> new UsernameNotFoundException("Admin topilmadi: " + username));
+        return new AdminDetails(admin);
     }
+
 }

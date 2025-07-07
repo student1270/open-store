@@ -7,9 +7,9 @@ public enum Status {
 
     OUT_OF_STOCK("TUGAGAN");
     private final String outOfStock;
-    private String status;
 
-    Status(String tugagan) {
-        this.outOfStock = tugagan;
+
+    Status(String outOfStock) {
+        this.outOfStock = outOfStock;
     }
 }

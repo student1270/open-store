@@ -381,7 +381,11 @@
         <button onclick="prevReviews()" class="px-3 py-2 bg-gray-200 rounded-full hover:bg-gray-300">&#8592;</button>
 
         <div id="review-slider" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full px-4">
-            <div th:each="review : ${latestTwoReviews}" class="border rounded-lg p-4 bg-white shadow">
+            <div th:if="${#lists.isEmpty(latestTwoReviews)}" class="col-span-2 text-center text-gray-500">
+                Hozircha izohlar mavjud emas.
+            </div>
+            <div th:each="review : ${latestTwoReviews}" th:if="${!#lists.isEmpty(latestTwoReviews)}"
+                 class="border rounded-lg p-4 bg-white shadow">
                 <div class="text-sm text-gray-500 mb-1" th:text="${review.username}">Foydalanuvchi</div>
                 <div class="text-xs text-gray-400 mb-2"
                      th:text="${#temporals.format(review.localDateTime, 'yyyy-MM-dd HH:mm')}">Sana</div>
@@ -405,7 +409,7 @@
 
 <script>
     const reviews = [
-        <th:block th:each="review : ${latestTwoReviews}">
+        <th:block th:if="${latestTwoReviews != null}" th:each="review : ${latestTwoReviews}">
             {
                 id: [[${review.id}]],
                 user: "[[${review.username}]]",
@@ -422,6 +426,11 @@
     function renderReviews() {
         const slider = document.getElementById("review-slider");
         slider.innerHTML = "";
+
+        if (reviews.length === 0) {
+            slider.innerHTML = `<p class="col-span-2 text-center text-gray-500">Izohlar mavjud emas.</p>`;
+            return;
+        }
 
         const end = Math.min(currentIndex + perPage, reviews.length);
         const visibleReviews = reviews.slice(currentIndex, end);

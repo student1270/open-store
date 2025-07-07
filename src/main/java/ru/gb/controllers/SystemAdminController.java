@@ -15,8 +15,8 @@ import ru.gb.service.ProductService;
 import java.math.BigDecimal;
 
 @Controller
-@RequestMapping("/admin")
-public class AdminController {
+@RequestMapping("/system-admin")
+public class SystemAdminController {
 
 
     @Autowired
@@ -25,7 +25,7 @@ public class AdminController {
     @GetMapping
     public String showAdminPage(Model model) {
         model.addAttribute("title", "Admin Paneli");
-        return "admin";
+        return "system-admin";
     }
 
     @GetMapping("/add-product")
@@ -53,7 +53,7 @@ public class AdminController {
         } else {
             model.addAttribute("message", "Mahsulot qo'shishda xatolik yuz berdi!");
         }
-        return "redirect:/admin";
+        return "redirect:/system-admin";
     }
 }
 

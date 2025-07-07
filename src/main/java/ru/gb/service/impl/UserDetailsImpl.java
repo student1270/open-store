@@ -2,6 +2,7 @@ package ru.gb.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,10 +13,13 @@ import java.util.Collection;
 import java.util.List;
 
 @Getter
-@AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 
     private final User user;
+
+    public UserDetailsImpl(User user) {
+        this.user = user;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
