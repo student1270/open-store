@@ -22,7 +22,7 @@ public class SecurityConfig {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
-    private final AdminDetailsService adminDetailsService; // 🔹 qo‘shildi
+    private final AdminDetailsService adminDetailsService;
 
     private static final String ROLE_SYSTEM_ADMIN = Roles.SYSTEM_ADMIN.getValue().replace("ROLE_", "");
     private static final String ROLE_USER = Roles.USER.getValue().replace("ROLE_", "");
@@ -31,12 +31,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .userDetailsService(adminDetailsService) // 🔹 BU YERDA KERAKLI SERVICE TANLANDI
+                .userDetailsService(adminDetailsService)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/", "/index",
                                 "/login", "/admin-login", "/home", "/home/**", "/error",
                                 "/favicon.ico", "/product/**", "/cart", "/cart/add", "/{productId}/reviews", "/reviews", "/reviews/**").permitAll()
-                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/api/**", "/ws/**").permitAll() // WebSocket uchun autentifikatsiyani o'chirish
                         .requestMatchers("/register/**", "/check-user-details").anonymous()
                         .requestMatchers("/user").hasRole(ROLE_USER)
                         .requestMatchers("/system-admin").hasRole(ROLE_SYSTEM_ADMIN)
@@ -54,24 +54,17 @@ public class SecurityConfig {
                                     authentication.getName(),
                                     session != null ? session.getId() : "null",
                                     authentication.getAuthorities());
-
-
                             Object principal = authentication.getPrincipal();
-
-                            String redirectUrl = "/home"; // default
-
+                            String redirectUrl = "/home";
                             if (principal instanceof ru.gb.service.impl.AdminDetails adminDetails) {
                                 String role = adminDetails.getAdmin().getRole().getValue();
-
                                 switch (role) {
                                     case "SYSTEM_ADMIN" -> redirectUrl = "/admin-panel";
                                     case "WAREHOUSE_ADMIN" -> redirectUrl = "/warehouse-admin";
                                 }
                             }
-
                             response.sendRedirect(redirectUrl);
                         })
-
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -82,7 +75,7 @@ public class SecurityConfig {
                 )
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .ignoringRequestMatchers("/api/**", "/cart/checkout", "/cart/confirm")
+                        .ignoringRequestMatchers("/api/**", "/cart/checkout", "/cart/confirm", "/ws/**")
                 )
                 .sessionManagement(session -> session
                         .sessionFixation().migrateSession()

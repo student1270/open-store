@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.gb.model.Cart;
 import ru.gb.model.CartProduct;
+import ru.gb.model.Order;
 import ru.gb.model.Roles;
 import ru.gb.repository.CartRepository;
 import ru.gb.service.CartProductService;
@@ -25,6 +28,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CartController {
     private static final Logger log = LoggerFactory.getLogger(CartController.class);
+
+
 
     private final CartService cartService;
     private final CartRepository cartRepository;
@@ -134,39 +139,32 @@ public class CartController {
     }
 
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     @PostMapping("/confirm")
     public String confirmPurchase(HttpSession session, RedirectAttributes redirectAttributes) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        log.info("Confirm request. Session ID: {}, Authentication: {}, IsAuthenticated: {}, Roles: {}, Principal: {}",
-                session.getId(),
-                auth != null ? auth.getName() : "null",
-                auth != null && auth.isAuthenticated(),
-                auth != null ? auth.getAuthorities() : "null",
-                auth != null ? auth.getPrincipal() : "null");
-
         if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() instanceof String) {
-            log.warn("User not authenticated, redirecting to login. Session ID: {}", session.getId());
             redirectAttributes.addFlashAttribute("error", "Xaridni tasdiqlash uchun tizimga kiring!");
             return "redirect:/login";
         }
 
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
-        Roles role = userDetails.getUser().getRole();
-        log.info("User authenticated. User ID: {}, Role: {}, Email: {}",
-                userDetails.getUser().getId(), role, userDetails.getUsername());
-
-        if (!Roles.USER.equals(role)) {
-            log.warn("User role is not USER: {}", role);
+        if (!Roles.USER.equals(userDetails.getUser().getRole())) {
             redirectAttributes.addFlashAttribute("error", "Faqat oddiy foydalanuvchilar xarid qilishi mumkin.");
             return "redirect:/cart";
         }
 
-        boolean purchaseConfirmed = cartService.confirmPurchase(session);
-        if (purchaseConfirmed) {
+        Order order = cartService.confirmPurchase(session);
+        if (order != null) {
+
+            messagingTemplate.convertAndSend("/topic/warehouse-orders", order);
+
             redirectAttributes.addFlashAttribute("success", "Xarid muvaffaqiyatli amalga oshirildi!");
             return "redirect:/home";
         } else {
-            redirectAttributes.addFlashAttribute("error", "Xaridni amalga oshirishda xatolik: Omborda yetarli mahsulot yo‘q yoki savat bo‘sh!");
+            redirectAttributes.addFlashAttribute("error", "Xaridni amalga oshirishda xatolik!");
             return "redirect:/cart";
         }
     }

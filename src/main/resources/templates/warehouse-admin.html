@@ -57,10 +57,18 @@
     }
 
     function addNotification(order) {
+        // Order mavjudligini tekshirish
+        if (!order || typeof order !== 'object' || !order.id || !order.date) {
+            console.error('Noto‘g‘ri buyurtma ma’lumotlari:', order);
+            return; // Undefined yoki noto‘g‘ri formatdagi buyurtmalarni e‘tiborsiz qoldirish
+        }
+
         const list = document.getElementById("notificationList");
         const item = document.createElement("li");
-        item.className = "px-4 py-3 border-b border-gray-200 hover:bg-gray-100 cursor-pointer";
-        item.innerHTML = `<strong>Yangi buyurtma:</strong> #${order.id}<br><span class="text-sm text-gray-500">${order.date}</span>`;
+        item.className = "px-4 py-3 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex justify-between items-center";
+        item.innerHTML = `
+            <span><strong>Yangi buyurtma:</strong> #${order.id}<br><span class="text-sm text-gray-500">${order.date}</span></span>
+        `;
 
         item.addEventListener("click", () => {
             showOrder(order);
@@ -72,14 +80,6 @@
         list.prepend(item);
         notificationCount++;
         updateNotificationCount();
-
-        setTimeout(() => {
-            if (item.parentElement) {
-                item.remove();
-                notificationCount--;
-                updateNotificationCount();
-            }
-        }, 5000);
     }
 
     function showOrder(order) {
@@ -144,18 +144,20 @@
         }
     }
 
-
-    const socket = new SockJS('/ws');
+    const socket = new SockJS('http://localhost:8083/ws');
     const stompClient = Stomp.over(socket);
 
     stompClient.connect({}, function (frame) {
-        console.log('Ulandi: ' + frame);
+        console.log('WebSocket ulandi: ', frame);
         stompClient.subscribe('/topic/warehouse-orders', function (message) {
+            console.log('Yangi buyurtma qabul qilindi: ', message.body);
             const order = JSON.parse(message.body);
             addNotification(order);
         });
+    }, function (error) {
+        console.error('WebSocket ulanish xatosi: ', error);
+        alert('WebSocket ulanishida xato yuz berdi. Iltimos, sahifani yangilang yoki tizim adminiga murojaat qiling.');
     });
 </script>
-
 </body>
 </html>

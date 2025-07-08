@@ -114,29 +114,27 @@ public class CartService {
     }
 
     @Transactional
-    public boolean confirmPurchase(HttpSession session) {
+    public Order confirmPurchase(HttpSession session) {
         log.info("Confirming purchase for session: {}", session.getId());
         Cart cart = getOrCreateCart(session);
 
         if (cart.getId() == null) {
             log.warn("Cannot confirm purchase: Cart is session-based and not linked to a user.");
-            return false;
+            return null;
         }
 
         List<CartProduct> cartItems = cartProductRepository.findAllByCartWithProduct(cart);
         if (cartItems.isEmpty()) {
             log.warn("Cannot confirm purchase: Cart is empty.");
-            return false;
+            return null;
         }
-
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByEmailAddress(auth.getName()).orElse(null);
         if (user == null) {
             log.warn("User not found for purchase confirmation: Email: {}", auth.getName());
-            return false;
+            return null;
         }
-
 
         Order order = orderService.createOrder(
                 user.getId(),
@@ -147,12 +145,10 @@ public class CartService {
         );
         log.debug("Created order: Order ID: {}", order.getId());
 
-
         for (CartProduct item : cartItems) {
             orderService.addItemToOrder(order, item.getProduct().getId(), item.getQuantity());
             log.debug("Added item to order: Product ID: {}, Quantity: {}", item.getProduct().getId(), item.getQuantity());
         }
-
 
         for (CartProduct item : cartItems) {
             Product product = item.getProduct();
@@ -162,18 +158,18 @@ public class CartService {
             if (availableQuantity < requestedQuantity) {
                 log.warn("Insufficient stock for product: Product ID: {}, Available: {}, Requested: {}",
                         product.getId(), availableQuantity, requestedQuantity);
-                return false;
+                return null;
             }
-            int newQuantity = availableQuantity - requestedQuantity;
-            product.setStockQuantity(newQuantity);
+
+            product.setStockQuantity(availableQuantity - requestedQuantity);
             productRepository.save(product);
-            log.debug("Updated stock for product: Product ID: {}, New Stock: {}", product.getId(), newQuantity);
+            log.debug("Updated stock for product: Product ID: {}, New Stock: {}", product.getId(), product.getStockQuantity());
         }
 
-
         clearCart(session);
+        orderService.sendOrderToWarehouseAdmin(order.getId());
         log.info("Purchase confirmed, order saved, and cart cleared for session: {}", session.getId());
-        return true;
+        return order;
     }
 
     @Transactional
