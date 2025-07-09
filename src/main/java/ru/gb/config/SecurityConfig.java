@@ -24,7 +24,7 @@ public class SecurityConfig {
 
     private final AdminDetailsService adminDetailsService;
 
-    private static final String ROLE_SYSTEM_ADMIN = Roles.SYSTEM_ADMIN.getValue().replace("ROLE_", "");
+    private static final String ROLE_ORDER_ADMIN = Roles.ORDER_ADMIN.getValue().replace("ROLE_", "");
     private static final String ROLE_USER = Roles.USER.getValue().replace("ROLE_", "");
     private static final String ROLE_WAREHOUSE_ADMIN = Roles.WAREHOUSE_ADMIN.getValue().replace("ROLE_", "");
 
@@ -36,10 +36,10 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/", "/index",
                                 "/login", "/admin-login", "/home", "/home/**", "/error",
                                 "/favicon.ico", "/product/**", "/cart", "/cart/add", "/{productId}/reviews", "/reviews", "/reviews/**").permitAll()
-                        .requestMatchers("/api/**", "/ws/**").permitAll() // WebSocket uchun autentifikatsiyani o'chirish
+                        .requestMatchers("/api/**", "/ws/**").permitAll()
                         .requestMatchers("/register/**", "/check-user-details").anonymous()
                         .requestMatchers("/user").hasRole(ROLE_USER)
-                        .requestMatchers("/system-admin").hasRole(ROLE_SYSTEM_ADMIN)
+                        .requestMatchers("/order-admin", "/order-admin/**").hasRole(ROLE_ORDER_ADMIN)
                         .requestMatchers("/warehouse-admin").hasRole(ROLE_WAREHOUSE_ADMIN)
                         .requestMatchers("/cart/checkout", "/cart/confirm").hasRole(ROLE_USER)
                         .anyRequest().authenticated()
@@ -59,7 +59,7 @@ public class SecurityConfig {
                             if (principal instanceof ru.gb.service.impl.AdminDetails adminDetails) {
                                 String role = adminDetails.getAdmin().getRole().getValue();
                                 switch (role) {
-                                    case "SYSTEM_ADMIN" -> redirectUrl = "/admin-panel";
+                                    case "ORDER_ADMIN" -> redirectUrl = "/order-admin";
                                     case "WAREHOUSE_ADMIN" -> redirectUrl = "/warehouse-admin";
                                 }
                             }

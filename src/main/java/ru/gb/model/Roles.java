@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum Roles {
-    SYSTEM_ADMIN("ORDER_ADMIN"),
+    ORDER_ADMIN("ORDER_ADMIN"),
     USER("USER"),
     WAREHOUSE_ADMIN("WAREHOUSE_ADMIN");
 

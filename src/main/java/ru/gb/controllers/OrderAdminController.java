@@ -1,6 +1,5 @@
 package ru.gb.controllers;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,9 +14,8 @@ import ru.gb.service.ProductService;
 import java.math.BigDecimal;
 
 @Controller
-@RequestMapping("/system-admin")
-public class SystemAdminController {
-
+@RequestMapping("/order-admin")
+public class OrderAdminController {
 
     @Autowired
     private ProductService productService;
@@ -25,7 +23,7 @@ public class SystemAdminController {
     @GetMapping
     public String showAdminPage(Model model) {
         model.addAttribute("title", "Admin Paneli");
-        return "system-admin";
+        return "order-admin";
     }
 
     @GetMapping("/add-product")
@@ -53,7 +51,13 @@ public class SystemAdminController {
         } else {
             model.addAttribute("message", "Mahsulot qo'shishda xatolik yuz berdi!");
         }
-        return "redirect:/system-admin";
+        return "redirect:/order-admin";
+    }
+
+    @GetMapping("/stored-orders")
+    public String showStoredOrdersPage(Model model) {
+        model.addAttribute("title", "Saqlanayotgan Buyurtmalar");
+        return "stored-orders";
     }
 }
 
