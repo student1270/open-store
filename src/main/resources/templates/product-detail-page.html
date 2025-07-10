@@ -377,32 +377,39 @@
 </div>
 
 <!-- SHARHLAR QISMI -->
-<div class="container mt-10">
+<div class="container mt-10" th:if="${productDetailPage != null}">
     <h2 class="text-xl font-semibold mb-4">Foydalanuvchi izohlari</h2>
 
     <div class="flex justify-between items-center mb-6">
         <button onclick="previousReviews()" class="px-4 py-2 bg-gray-200 rounded-full hover:bg-gray-300">←</button>
         <div id="review-slider" class="grid grid-cols-2 gap-4 w-full">
+            <!-- Reviewlar mavjud bo'lsa -->
             <div th:each="review : ${latestTwoReviews}"
-                 th:if="${review != null and review.id != null}"
+                 th:if="${review != null}"
                  class="border rounded-lg p-5 bg-white shadow-md">
+                <!-- Null-safe user ma'lumotlari -->
                 <h3 class="text-sm text-gray-600 mb-1"
-                    th:text="${review.user != null ? review.user.name + ' ' + review.user.surname : 'Anonim foydalanuvchi'}">
+                    th:text="${review.user?.name + ' ' + review.user?.surname} ?: 'Anonim foydalanuvchi'">
                     Foydalanuvchi
                 </h3>
+                <!-- Null-safe sana -->
                 <div class="text-xs text-gray-400 mb-2"
                      th:text="${review.localDateTime != null ? #temporals.format(review.localDateTime, 'yyyy-MM-dd HH:mm') : 'Sana mavjud emas'}">
                     Sana
                 </div>
+                <!-- Null-safe reyting -->
                 <div class="text-yellow-500 mb-2">
                     <span th:each="i : ${#numbers.sequence(1, 5)}"
                           th:text="${i <= (review.rating ?: 0) ? '★' : '☆'}"></span>
                 </div>
-                <p class="text-sm"><strong>Izoh:</strong> <span th:text="${review.commentText} ?: 'Izoh mavjud emas'">Bu yerda izoh</span></p>
+                <!-- Null-safe izoh -->
+                <p class="text-sm"><strong>Izoh:</strong> <span th:text="${review.commentText} ?: 'Izoh mavjud emas'"></span></p>
             </div>
-            <div th:unless="${latestTwoReviews != null and !#lists.isEmpty(latestTwoReviews)}"
+
+            <!-- Reviewlar bo'lmasa -->
+            <div th:if="${latestTwoReviews == null or latestTwoReviews.isEmpty()}"
                  class="col-span-2 text-center text-gray-500 py-4">
-                Hozircha izohlar mavjud emas. Birinchi bo‘lib izoh qoldiring!
+                Hozircha izohlar mavjud emas. Birinchi bo'lib izoh qoldiring!
             </div>
         </div>
         <button onclick="nextReviews()" class="px-4 py-2 bg-gray-200 rounded-full hover:bg-gray-300">→</button>
@@ -416,28 +423,31 @@
     </div>
 </div>
 
-<script>
-    const reviews = [];
-    <th:block th:if="${latestTwoReviews != null and !#lists.isEmpty(latestTwoReviews)}">
-        <th:block th:each="review : ${latestTwoReviews}" th:if="${review != null and review.id != null}">
+<script th:inline="javascript">
+    var reviews = [];
+
+    <th:block th:if="${latestTwoReviews != null and !latestTwoReviews.isEmpty()}">
+        <th:block th:each="review : ${#lists.select(latestTwoReviews, r -> r != null)}">
             reviews.push({
-            id: [[${review.id} ?: 0]],
-            user: "[[${review.user != null ? review.user.name + ' ' + review.user.surname : 'Anon'}]]",
+            id: [[${review?.id ?: 0}]],
+            user: "[[${review.user?.name + ' ' + review.user?.surname} ?: 'Anonim foydalanuvchi']]",
             date: "[[${review.localDateTime != null ? #temporals.format(review.localDateTime, 'yyyy-MM-dd HH:mm') : 'Sana mavjud emas'}]]",
-            rating: [[${review.rating} ?: 0]],
-            commentText: "[[${review.commentText} ?: 'Izoh mavjud emas']]"
+            rating: [[${review.rating ?: 0}]],
+            commentText: "[[${review.commentText ?: 'Izoh mavjud emas'}]]"
         });
         </th:block>
     </th:block>
-    <th:block th:unless="${latestTwoReviews != null and !#lists.isEmpty(latestTwoReviews)}">
+
+    <th:block th:if="${latestTwoReviews == null or latestTwoReviews.isEmpty()}">
         reviews.push({
         id: 0,
-        user: "Anon",
-        date: "Hozircha sana mavjud emas",
+        user: "Anonim",
+        date: "Hozircha izohlar mavjud emas",
         rating: 0,
-        commentText: "Hozircha izohlar mavjud emas"
+        commentText: "Birinchi bo'lib izoh qoldiring"
     });
     </th:block>
+
 
     let currentIndex = 0;
     const PER_PAGE = 2;
@@ -488,5 +498,7 @@
         renderReviews();
     });
 </script>
+
+
 </body>
 </html>
