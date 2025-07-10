@@ -8,7 +8,6 @@ import ru.gb.model.Product;
 import ru.gb.repository.ProductRepository;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -23,7 +22,7 @@ public class ProductService {
 
     public boolean saveProduct(Product product, MultipartFile image, String categoryPath) {
         boolean productNameConditions = product != null && product.getName() != null && !product.getName().trim().isEmpty() && product.getName().length() <= 100;
-        boolean productPriceConditions = product.getPrice().compareTo(BigDecimal.ZERO) > 0 && product.getPrice() != null;
+        boolean productPriceConditions = product.getPrice() != null && product.getPrice().compareTo(BigDecimal.ZERO) > 0;
         boolean productStockQuantityConditions = product.getStockQuantity() != null && product.getStockQuantity() > 0;
         boolean productDescriptionConditions = product.getDescription() != null && !product.getDescription().trim().isEmpty() && !product.getDescription().isBlank();
         String imagePath = imageService.uploadImage(image);
@@ -39,12 +38,16 @@ public class ProductService {
                 }
             }
             product.setImagePath(imagePath);
+            if (product.getCommentCount() == null) {
+                product.setCommentCount(0);
+            }
             productRepository.save(product);
             return true;
         }
         return false;
     }
-    public Product findProductsById(Long id){
-        return productRepository.findById(id).orElseThrow(RuntimeException::new);
+
+    public Product findProductsById(Long id) {
+        return productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found: " + id));
     }
 }

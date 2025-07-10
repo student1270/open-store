@@ -389,7 +389,6 @@
     </div>
 </header>
 
-
 <!-- KATALOG MENYUSI -->
 <div id="catalogMenu" class="catalog-menu">
     <ul>
@@ -447,11 +446,13 @@
             </div>
             <h3 th:text="${product.name}">Mahsulot nomi</h3>
             <div class="rating">
-                <span th:if="${product.rating > 0}">★
-                    <span th:text="${#numbers.formatDecimal(product.rating, 1, 2)}"></span>
+                <span th:if="${product.rating != null and product.commentCount > 0}">
+                    ★ <span th:text="${#numbers.formatDecimal(product.rating, 1, 2)}"></span>
                     (<span th:text="${product.commentCount} + ' ta sharh'"></span>)
                 </span>
-                <span th:unless="${product.rating > 0}">Hozircha baho yo‘q</span>
+                <span th:unless="${product.rating != null and product.commentCount > 0}" class="text-gray-500">
+                    Hozircha baho yo‘q
+                </span>
             </div>
             <div class="price" th:text="|${product.price} so'm|">150 000 so'm</div>
         </a>

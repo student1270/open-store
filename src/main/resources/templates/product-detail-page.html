@@ -44,14 +44,14 @@
             padding: 12px 24px;
             border: none;
             border-radius: 6px;
-            font-size: 16px;
+            font-size SPEC16px: 16px;
             font-weight: bold;
             text-decoration: none;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         .login-button:hover {
-            background-color: #3730a3;
+            background-color: #3730f3;
             transform: scale(1.05);
         }
 
@@ -59,11 +59,11 @@
             background-color: #f97316;
             color: white;
             padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
             font-size: 16px;
             font-weight: bold;
             text-decoration: none;
+            border: none;
+            border-radius: 6px;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
@@ -111,9 +111,9 @@
             top: 70px;
             left: 30px;
             background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            border: 6px solid #ddd;
             padding: 15px;
+            border-radius: 12px;
             box-shadow: 0 6px 12px rgba(0,0,0,0.1);
             z-index: 1000;
             width: 300px;
@@ -132,9 +132,9 @@
             gap: 10px;
         }
 
-        .catalog-menu ul li {
+        .catalog-menu li {
             position: relative;
-            padding: 10px 15px;
+            padding: 10px 16px;
             font-size: 16px;
             color: #333;
             background-color: white;
@@ -142,11 +142,11 @@
             cursor: pointer;
         }
 
-        .catalog-menu ul li:hover {
+        .catalog-menu li:hover {
             background-color: #f5f5f5;
         }
 
-        .catalog-menu ul li a {
+        .catalog-menu li a {
             text-decoration: none;
             color: #333;
         }
@@ -156,11 +156,11 @@
             position: absolute;
             top: 0;
             left: 100%;
-            background-color: #fff;
+            background-color: white;
             border: 1px solid #ddd;
-            border-radius: 6px;
             padding: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 6px;
+            box-shadow: 0 4px rgba(0,0,0,0.1);
             min-width: 250px;
         }
 
@@ -177,11 +177,10 @@
         }
 
         .sub-menu li {
-            padding: 8px 12px;
-            background-color: white;
+            background-color: #f0f0f0;
+            padding: 2px 8px;
             border-radius: 4px;
         }
-
         .sub-menu li:hover {
             background-color: #f0f0f0;
         }
@@ -190,7 +189,7 @@
             max-width: 1100px;
             margin: auto;
             margin-top: 40px;
-            background-color: #fff;
+            background-color: white;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
@@ -231,15 +230,15 @@
             max-width: 350px;
             max-height: 350px;
             object-fit: contain;
-            border-radius: 8px;
+            margin-bottom: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
         .price {
             text-align: center;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: bold;
-            color: #007BFF;
+            color: #007bff;
             margin-top: 20px;
         }
 
@@ -247,7 +246,7 @@
             text-align: center;
             margin-top: 10px;
             color: #28a745;
-            font-weight: 500;
+            font-weight: bold;
         }
 
         .description {
@@ -264,27 +263,28 @@
         }
 
         .cart-form {
-            margin-top: 30px;
-            display: flex;
+            margin-top: 20px;
+            display:scale flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap-gap: 10px;
         }
 
         .cart-btn {
             padding: 8px 15px;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             font-size: 14px;
             cursor: pointer;
             background-color: blueviolet;
             color: white;
+            margin-left: 40px;
         }
-
         .quantity-input {
             padding: 6px 10px;
-            font-size: 16px;
-            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 6px;
+            border-radius: 10px;
             border: 1px solid #ccc;
             width: 70px;
             text-align: center;
@@ -303,31 +303,30 @@
 <header>
     <div style="display: flex; gap: 10px;">
         <button onclick="toggleCatalog()" class="catalog-button">Katalog</button>
-        <a th:href="@{/cart}" class="cart-button">Savat</a>
+        <a th:href="@{/cart}" class="Review-cart-button">Cart</a>
     </div>
     <div style="display: flex; gap: 15px; flex-direction: column; align-items: flex-end;">
         <div sec:authorize="isAnonymous()" style="display: flex; gap: 15px;">
-            <a th:href="@{/login}" class="login-button">Kirish</a>
-            <a th:href="@{/register}" class="register-button">Ro'yxatdan o'tish</a>
+            <a th:href="@{/login}" class="login-button">Login</a>
+            <a th:href="@{/register}" class="register-button">Register</a>
         </div>
-        <a th:href="@{/admin-login}" class="admin-login-link" sec:authorize="isAnonymous()">Adminlar uchun kirish</a>
+        <a th:href="@{/admin-login}" class="admin-login-link" sec:authorize="isAnonymous">Admin Login</a>
     </div>
 </header>
-
 
 <!-- KATALOG MENU -->
 <div id="catalogMenu" class="catalog-menu">
     <ul>
         <li th:each="category : ${categories}" th:if="${category != null and category.parent == null}">
             <span th:text="${category.categoryName} ?: 'Noma'lum kategoriya'">Kategoriya nomi</span>
-            <div class="sub-menu" th:unless="${#lists.isEmpty(category.children)}">
+            <div class="sub-menu" th:unless="${!#lists.isEmpty(category.children)}">
                 <ul>
                     <li th:each="subCategory : ${category.children}" th:if="${subCategory != null}">
-                        <a th:href="@{/home/category/{id}(id=${subCategory.id})}" th:text="${subCategory.categoryName} ?: 'Noma'lum subkategoriya'">Subkategoriya</a>
-                        <div class="sub-menu" th:unless="${#lists.isEmpty(subCategory.children)}">
+                        <a th:href="@{/home/category/{id}(id=${subCategory.id})}" th:text="${subCategory.categoryName} ?: 'Noma'lum subkategoriya'">Subkategorija</a>
+                        <div class="sub-menu" th:unless="${!#lists.isEmpty(subCategory.children)}">
                             <ul>
-                                <li th:each="subSubCategory : ${subSubCategory.children}" th:if="${subSubCategory != null}">
-                                    <a th:href="@{/home/category/{id}(id=${subSubCategory.id})}" th:text="${subSubCategory.categoryName} ?: 'Noma'lum sub-subkategoriya'">Sub-subkategoriya</a>
+                                <li th:each="subSubCategory : ${subCategory.children}" th:if="${subSubCategory != null}">
+                                    <a th:href="@{/home/category/{id}(id=${subSubCategory.id})}" th:text="${subSubCategory.categoryName} ?: 'Noma'lum sub-subkategoriya'">Sub-subkategorija</a>
                                 </li>
                             </ul>
                         </div>
@@ -346,10 +345,14 @@
     </div>
     <div class="product-name" th:text="${productDetailPage.name}">Mahsulot nomi</div>
     <div class="product-meta">
-        <span class="star">★</span>
-        <span th:text="${#numbers.formatDecimal(productDetailPage.rating, 1, 2)}">4.5</span>
-        <span th:if="${productDetailPage.commentCount != null}"
-              th:text="'(' + ${productDetailPage.commentCount} + ' ta sharh)'">(0 ta sharh)</span>
+        <span th:if="${productDetailPage.rating != null and productDetailPage.commentCount > 0}">
+            <span class="star">★</span>
+            <span th:text="${#numbers.formatDecimal(productDetailPage.rating, 1, 2)}">4.5</span>
+        </span>
+        <span th:unless="${productDetailPage.rating != null and productDetailPage.commentCount > 0}" class="text-gray-600">
+            Hali baholanmagan
+        </span>
+        <span th:text="'(' + ${productDetailPage.commentCount != null ? productDetailPage.commentCount : 0} + ' ta sharh)'"></span>
     </div>
     <div class="image-section">
         <img th:src="@{/images/{imagePath}(imagePath=${productDetailPage.imagePath})}" alt="Mahsulot rasmi">
@@ -377,95 +380,113 @@
 <div class="container mt-10">
     <h2 class="text-xl font-semibold mb-4">Foydalanuvchi izohlari</h2>
 
-    <div class="flex justify-between items-center mb-4">
-        <button onclick="prevReviews()" class="px-3 py-2 bg-gray-200 rounded-full hover:bg-gray-300">&#8592;</button>
-
-        <div id="review-slider" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full px-4">
-            <div th:if="${#lists.isEmpty(latestTwoReviews)}" class="col-span-2 text-center text-gray-500">
-                Hozircha izohlar mavjud emas.
-            </div>
-            <div th:each="review : ${latestTwoReviews}" th:if="${!#lists.isEmpty(latestTwoReviews)}"
-                 class="border rounded-lg p-4 bg-white shadow">
-                <div class="text-sm text-gray-500 mb-1" th:text="${review.username}">Foydalanuvchi</div>
+    <div class="flex justify-between items-center mb-6">
+        <button onclick="previousReviews()" class="px-4 py-2 bg-gray-200 rounded-full hover:bg-gray-300">←</button>
+        <div id="review-slider" class="grid grid-cols-2 gap-4 w-full">
+            <div th:each="review : ${latestTwoReviews}"
+                 th:if="${review != null and review.id != null}"
+                 class="border rounded-lg p-5 bg-white shadow-md">
+                <h3 class="text-sm text-gray-600 mb-1"
+                    th:text="${review.user != null ? review.user.name + ' ' + review.user.surname : 'Anonim foydalanuvchi'}">
+                    Foydalanuvchi
+                </h3>
                 <div class="text-xs text-gray-400 mb-2"
-                     th:text="${#temporals.format(review.localDateTime, 'yyyy-MM-dd HH:mm')}">Sana</div>
+                     th:text="${review.localDateTime != null ? #temporals.format(review.localDateTime, 'yyyy-MM-dd HH:mm') : 'Sana mavjud emas'}">
+                    Sana
+                </div>
                 <div class="text-yellow-500 mb-2">
                     <span th:each="i : ${#numbers.sequence(1, 5)}"
-                          th:text="${i <= review.rating ? '★' : '☆'}"></span>
+                          th:text="${i <= (review.rating ?: 0) ? '★' : '☆'}"></span>
                 </div>
-                <p><strong>Izoh:</strong> <span th:text="${review.comment}">Bu yerda izoh</span></p>
+                <p class="text-sm"><strong>Izoh:</strong> <span th:text="${review.commentText} ?: 'Izoh mavjud emas'">Bu yerda izoh</span></p>
+            </div>
+            <div th:unless="${latestTwoReviews != null and !#lists.isEmpty(latestTwoReviews)}"
+                 class="col-span-2 text-center text-gray-500 py-4">
+                Hozircha izohlar mavjud emas. Birinchi bo‘lib izoh qoldiring!
             </div>
         </div>
-
-        <button onclick="nextReviews()" class="px-3 py-2 bg-gray-200 rounded-full hover:bg-gray-300">&#8594;</button>
+        <button onclick="nextReviews()" class="px-4 py-2 bg-gray-200 rounded-full hover:bg-gray-300">→</button>
     </div>
 
     <div class="text-center">
-        <a th:href="@{/product/{id}/reviews(id=${productDetailPage.id})}" class="block text-blue-600 font-semibold hover:underline bg-gray-100 py-2 rounded">
+        <a th:href="@{/product/{id}/reviews(id=${productDetailPage.id})}"
+           class="block text-blue-600 font-semibold hover:underline bg-gray-100 py-3 rounded-lg">
             Hamma sharhlarni ko'rish
         </a>
     </div>
 </div>
 
 <script>
-    const reviews = [
-        <th:block th:if="${latestTwoReviews != null}" th:each="review : ${latestTwoReviews}">
-            {
-                id: [[${review.id}]],
-                user: "[[${review.username}]]",
-                date: "[[${#temporals.format(review.localDateTime, 'yyyy-MM-dd HH:mm')}]]",
-                rating: [[${review.rating}]],
-                comment: "[[${review.comment}]]"
-            },
+    const reviews = [];
+    <th:block th:if="${latestTwoReviews != null and !#lists.isEmpty(latestTwoReviews)}">
+        <th:block th:each="review : ${latestTwoReviews}" th:if="${review != null and review.id != null}">
+            reviews.push({
+            id: [[${review.id} ?: 0]],
+            user: "[[${review.user != null ? review.user.name + ' ' + review.user.surname : 'Anon'}]]",
+            date: "[[${review.localDateTime != null ? #temporals.format(review.localDateTime, 'yyyy-MM-dd HH:mm') : 'Sana mavjud emas'}]]",
+            rating: [[${review.rating} ?: 0]],
+            commentText: "[[${review.commentText} ?: 'Izoh mavjud emas']]"
+        });
         </th:block>
-    ];
+    </th:block>
+    <th:block th:unless="${latestTwoReviews != null and !#lists.isEmpty(latestTwoReviews)}">
+        reviews.push({
+        id: 0,
+        user: "Anon",
+        date: "Hozircha sana mavjud emas",
+        rating: 0,
+        commentText: "Hozircha izohlar mavjud emas"
+    });
+    </th:block>
 
     let currentIndex = 0;
-    const perPage = 2;
+    const PER_PAGE = 2;
 
     function renderReviews() {
         const slider = document.getElementById("review-slider");
         slider.innerHTML = "";
 
-        if (reviews.length === 0) {
-            slider.innerHTML = `<p class="col-span-2 text-center text-gray-500">Izohlar mavjud emas.</p>`;
+        if (reviews.length === 0 || (reviews.length === 1 && reviews[0].id === 0)) {
+            slider.innerHTML = `<div class="col-span-2 text-center text-gray-500 py-4">
+                Hozircha izohlar mavjud emas. Birinchi bo‘lib izoh qoldiring!
+            </div>`;
             return;
         }
 
-        const end = Math.min(currentIndex + perPage, reviews.length);
+        const end = Math.min(currentIndex + PER_PAGE, reviews.length);
         const visibleReviews = reviews.slice(currentIndex, end);
 
-        for (const review of visibleReviews) {
-            const stars = Array(5).fill('☆').map((s, i) => i < review.rating ? '★' : '☆').join('');
-
+        visibleReviews.forEach(review => {
+            const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
             const reviewHtml = `
-                <div class="border rounded-lg p-4 bg-white shadow">
-                    <div class="text-sm text-gray-500 mb-1">${review.user}</div>
+                <div class="border rounded-lg p-5 bg-white shadow-md">
+                    <h3 class="text-sm text-gray-600 mb-1">${review.user}</h3>
                     <div class="text-xs text-gray-400 mb-2">${review.date}</div>
                     <div class="text-yellow-500 mb-2">${stars}</div>
-                    <p><strong>Izoh:</strong> ${review.comment}</p>
+                    <p class="text-sm"><strong>Izoh:</strong> ${review.commentText}</p>
                 </div>
             `;
             slider.innerHTML += reviewHtml;
-        }
+        });
     }
 
     function nextReviews() {
-        if (currentIndex + perPage < reviews.length) {
-            currentIndex += perPage;
+        if (currentIndex + PER_PAGE < reviews.length) {
+            currentIndex += PER_PAGE;
             renderReviews();
         }
     }
 
-    function prevReviews() {
-        if (currentIndex - perPage >= 0) {
-            currentIndex -= perPage;
+    function previousReviews() {
+        if (currentIndex - PER_PAGE >= 0) {
+            currentIndex -= PER_PAGE;
             renderReviews();
         }
     }
 
-    document.addEventListener("DOMContentLoaded", renderReviews);
+    document.addEventListener("DOMContentLoaded", () => {
+        renderReviews();
+    });
 </script>
-
 </body>
 </html>

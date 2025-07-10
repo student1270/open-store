@@ -25,11 +25,11 @@ public class Product {
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
-    
-    @Column(name = "description")
+
+    @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "image_path")
+    @Column(name = "image_path", nullable = false)
     private String imagePath;
 
     @Column(name = "stock_quantity", nullable = false)
@@ -40,10 +40,9 @@ public class Product {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(name = "comment_count")
-    private Integer commentCount;
+    @Column(name = "comment_count", nullable = true)
+    private Integer commentCount = 0;
 
-    @Column(name = "rating" , nullable = false)
-    private double rating;
-
+    @Column(name = "rating", nullable = true)
+    private Double rating;
 }

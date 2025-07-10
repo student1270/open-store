@@ -9,10 +9,10 @@ import ru.gb.model.Review;
 import java.util.List;
 
 @Repository
-public interface ReviewRepository extends JpaRepository<Review , Long> {
-    @Query(value = "SELECT * FROM review WHERE product_id = :id ORDER BY writed_time DESC", nativeQuery = true)
-    List<Review> findByProductIdOrderByLocalTimeDesc(@Param("id") Long id);
+public interface ReviewRepository extends JpaRepository<Review, Long> {
+    @Query("SELECT r FROM Review r WHERE r.product.id = :productId ORDER BY r.localDateTime DESC")
+    List<Review> findReviewsByProductIdDesc(@Param("productId") Long productId);
 
-    List<Review> findTop2ByProductIdOrderByLocalDateTimeDesc(Long id);
-
+    @Query("SELECT r FROM Review r WHERE r.product.id = :productId ORDER BY r.localDateTime DESC LIMIT 2")
+    List<Review> findTop2ByProductIdOrderByLocalDateTimeDesc(@Param("productId") Long productId);
 }

@@ -73,7 +73,7 @@
 
     <div th:each="review : ${reviews}" class="review-card">
         <div class="flex justify-between">
-            <div class="review-user" th:text="${review.user != null ? review.user.username : 'Noma‘lum foydalanuvchi'}">Foydalanuvchi</div>
+            <div class="review-user" th:text="${review.user != null ? review.user.name + ' ' + review.user.surname : 'Noma‘lum foydalanuvchi'}">Foydalanuvchi</div>
             <div class="review-date" th:text="${#temporals.format(review.localDateTime, 'dd MMM yyyy HH:mm')}">Sana</div>
         </div>
         <div class="review-rating" th:utext="${'&#9733;'.repeat(review.rating)} + '&#9734;'.repeat(5 - review.rating)">

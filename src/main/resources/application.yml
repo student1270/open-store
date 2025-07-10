@@ -52,6 +52,7 @@ logging:
     org.springframework.web: DEBUG
     org.springframework.security: TRACE
     org.springframework.mail: DEBUG
+
     ru.gb: TRACE
     org.hibernate.SQL: DEBUG
     org.hibernate.type: TRACE
