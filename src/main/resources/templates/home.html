@@ -114,6 +114,12 @@
             color: #333;
             background-color: #f3f4f6;
             border-radius: 6px;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .user-phone:hover {
+            background-color: #e5e7eb;
+            transform: scale(1.05);
         }
         .catalog-menu {
             display: none;
@@ -204,7 +210,7 @@
     <div style="display: flex; gap: 15px; flex-direction: column; align-items: flex-end;">
         <div sec:authorize="isAuthenticated()">
             <div style="display: flex; align-items: center; gap: 15px;">
-                <span class="user-phone" th:text="${#authentication.name} ?: 'Noma’lum foydalanuvchi'"></span>
+                <a th:href="@{/user}" class="user-phone" th:text="${#authentication.principal.user.name} ?: 'Noma’lum foydalanuvchi'"></a>
                 <a th:href="@{/logout}" class="logout-button">Chiqish</a>
             </div>
         </div>
@@ -244,7 +250,6 @@
 
 <!-- ASOSIY KONTENT -->
 <div style="padding: 20px;">
-    <!-- Bu yerda asosiy kontent bo'ladi -->
     <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">Xush kelibsiz!</h1>
     <p>Bu sizning asosiy sahifangiz. Katalog tugmasi orqali mahsulotlarni ko'rishingiz mumkin.</p>
 </div>

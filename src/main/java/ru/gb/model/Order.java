@@ -16,27 +16,41 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "last_name")
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "first_name")
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "order_date")
+    @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;
 
-    @Column(name = "category")
+    @Column(name = "status_updated_at", nullable = false)
+    private LocalDateTime statusUpdatedAt;
+
+    @Column(name = "delivery_date")
+    private LocalDateTime deliveryDate;
+
+    @Column(name = "category", nullable = false)
     private String category;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    @Column(name = "status", nullable = false)
+    private OrderStatus status = OrderStatus.BEING_COLLECTED;
+
+
+    public Order() {
+        this.orderDate = LocalDateTime.now();
+        this.statusUpdatedAt = LocalDateTime.now();
+        this.status = OrderStatus.BEING_COLLECTED;
+    }
 }

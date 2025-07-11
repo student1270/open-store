@@ -7,10 +7,15 @@ import org.springframework.web.bind.annotation.*;
 import ru.gb.model.Order;
 import ru.gb.model.OrderItem;
 import ru.gb.model.OrderNotificationDto;
+
 import ru.gb.service.OrderService;
 
 import jakarta.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -31,7 +36,6 @@ public class OrderController {
                 userId, lastName, firstName, email, category);
         try {
             Order order = orderService.createOrder(userId, lastName, firstName, email, category);
-            orderService.sendOrderToWarehouseAdmin(order.getId());
             return ResponseEntity.ok(order);
         } catch (Exception e) {
             log.error("Buyurtma yaratishda xato: userId={}, xato={}", userId, e.getMessage(), e);
@@ -57,6 +61,18 @@ public class OrderController {
         }
     }
 
+    @PostMapping("/{orderId}/send-to-warehouse")
+    public ResponseEntity<Void> sendToWarehouse(@PathVariable @NotNull Long orderId) {
+        log.info("Buyurtma omborxonaga yuborilmoqda: orderId={}", orderId);
+        try {
+            orderService.sendOrderToWarehouseAdmin(orderId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error("Omborxonaga yuborishda xato: orderId={}, xato={}", orderId, e.getMessage(), e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @PostMapping("/{orderId}/send-to-system-admin")
     public ResponseEntity<Void> sendToSystemAdmin(@PathVariable @NotNull Long orderId) {
         log.info("Buyurtma tizim adminiga yuborilmoqda: orderId={}", orderId);
@@ -71,7 +87,7 @@ public class OrderController {
 
     @PostMapping("/{orderId}/accept")
     public ResponseEntity<Void> acceptOrder(@PathVariable @NotNull Long orderId) {
-        log.info("Buyurtma qabul qilinmoqda: orderId={}", orderId);
+        log.info("Buyurtma tizim admini tomonidan qabul qilinmoqda: orderId={}", orderId);
         try {
             orderService.acceptOrderBySystemAdmin(orderId);
             return ResponseEntity.ok().build();
@@ -101,6 +117,20 @@ public class OrderController {
             return ResponseEntity.ok(storedOrders);
         } catch (Exception e) {
             log.error("Saqlanayotgan buyurtmalarni olishda xato: xato={}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<OrderNotificationDto>> getUserOrders(
+            @PathVariable @NotNull Long userId,
+            @RequestParam(required = false) String filter) {
+        log.info("Foydalanuvchi buyurtmalari so‘ralmoqda: userId={}, filter={}", userId, filter);
+        try {
+            List<OrderNotificationDto> dtos = orderService.getUserOrders(userId, filter);
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            log.error("Foydalanuvchi buyurtmalarini olishda xato: userId={}, xato={}", userId, e.getMessage(), e);
             return ResponseEntity.badRequest().body(null);
         }
     }
