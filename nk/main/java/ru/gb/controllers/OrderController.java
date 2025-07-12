@@ -6,15 +6,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.gb.model.Order;
 import ru.gb.model.OrderItem;
-import ru.gb.model.OrderItemDto;
 import ru.gb.model.OrderNotificationDto;
+
 import ru.gb.service.OrderService;
 
 import jakarta.validation.constraints.NotNull;
 
-
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -133,15 +134,4 @@ public class OrderController {
             return ResponseEntity.badRequest().body(null);
         }
     }
-    @GetMapping("/{orderId}/items")
-    public ResponseEntity<List<OrderItemDto>> getOrderItems(@PathVariable @NotNull Long orderId) {
-        try {
-            List<OrderItemDto> items = orderService.getOrderItems(orderId);
-            return ResponseEntity.ok(items);
-        } catch (Exception e) {
-            log.error("Buyurtma mahsulotlarini olishda xato: orderId={}, xato={}", orderId, e.getMessage(), e);
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
-
 }

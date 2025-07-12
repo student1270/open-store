@@ -107,7 +107,7 @@ public class OrderService {
             dtos = dtos.stream()
                     .filter(dto -> "PENDING_PAYMENT".equals(dto.getStatus()))
                     .collect(Collectors.toList());
-        } // "all" yoki boshqa holatlar uchun filtr qo'llanmaydi
+        }
 
         log.debug("Qaytarilgan buyurtmalar soni: {}", dtos.size());
         return dtos;
@@ -168,19 +168,13 @@ public class OrderService {
 
     public void deliverOrderToCustomer(Long orderId) {
         Order order = findById(orderId);
-        if (Arrays.asList(OrderStatus.BEING_COLLECTED, OrderStatus.ON_THE_WAY, OrderStatus.TAKE_IT_AWAY)
-                .contains(order.getStatus())) {
-            order.setStatus(OrderStatus.GIVEN_TO_CUSTOMER);
-            order.setStatusUpdatedAt(LocalDateTime.now());
-            orderRepository.save(order);
-            OrderStatusHistory history = new OrderStatusHistory(orderId, OrderStatus.GIVEN_TO_CUSTOMER.getValue(), LocalDateTime.now());
-            statusHistoryRepository.save(history);
-            notifyUser(orderId);
-            log.info("Buyurtma xaridorga topshirildi: Order ID: {}", orderId);
-        } else {
-            log.warn("Faqat faol holatdagi buyurtmalar topshirilishi mumkin: orderId={}", orderId);
-            throw new IllegalStateException("Faqat faol holatdagi buyurtmalar topshirilishi mumkin.");
-        }
+        order.setStatus(OrderStatus.GIVEN_TO_CUSTOMER);
+        order.setStatusUpdatedAt(LocalDateTime.now());
+        orderRepository.save(order);
+        OrderStatusHistory history = new OrderStatusHistory(orderId, OrderStatus.GIVEN_TO_CUSTOMER.getValue(), LocalDateTime.now());
+        statusHistoryRepository.save(history);
+        notifyUser(orderId);
+        log.info("Buyurtma xaridorga topshirildi: Order ID: {}", orderId);
     }
 
     public List<OrderNotificationDto> getStoredOrders() {
@@ -202,7 +196,7 @@ public class OrderService {
 
     private OrderNotificationDto createOrderNotificationDto(Order order) {
         if (order == null) {
-            return new OrderNotificationDto();
+            return new OrderNotificationDto(); // Yoki exception tashlang
         }
         List<OrderItem> orderItems = orderItemRepository.findByOrder(order);
         OrderNotificationDto dto = new OrderNotificationDto();
@@ -220,17 +214,10 @@ public class OrderService {
                     d.setId(item.getProductId());
                     d.setName(item.getProductName());
                     d.setCategory(order.getCategory());
+                    d.setPrice(productRepository.findById(item.getProductId())
+                            .map(Product::getPrice)
+                            .orElse(BigDecimal.ZERO));
                     d.setQuantity(item.getQuantity());
-
-                    Product product = productRepository.findById(item.getProductId()).orElse(null);
-                    if (product != null) {
-                        d.setPrice(product.getPrice());
-                        d.setImageUrl(product.getImageUrl());
-                    } else {
-                        d.setPrice(BigDecimal.ZERO);
-                        d.setImageUrl("/images/placeholder.png");
-                    }
-
                     return d;
                 }).collect(Collectors.toList());
 
@@ -250,22 +237,4 @@ public class OrderService {
         dto.setItems(itemDtos);
         return dto;
     }
-    public List<OrderItemDto> getOrderItems(Long orderId) {
-        Order order = findById(orderId);
-        List<OrderItem> items = orderItemRepository.findByOrder(order);
-
-        return items.stream()
-                .map(item -> {
-                    OrderItemDto dto = new OrderItemDto();
-                    dto.setId(item.getProductId());
-                    dto.setName(item.getProductName());
-                    dto.setCategory(order.getCategory());
-                    dto.setPrice(productRepository.findById(item.getProductId())
-                            .map(Product::getPrice)
-                            .orElse(BigDecimal.ZERO));
-                    dto.setQuantity(item.getQuantity());
-                    return dto;
-                }).collect(Collectors.toList());
-    }
-
 }

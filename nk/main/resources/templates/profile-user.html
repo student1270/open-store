@@ -273,18 +273,6 @@
                         ? order.statusHistory.map(h => `<div>${h.status} - ${new Date(h.statusUpdatedAt || order.orderDate).toLocaleString('uz')}</div>`).join('')
                         : '';
 
-                    const itemHtml = order.items.map(item => `
-    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-        <img src="${item.imageUrl || 'https://via.placeholder.com/50'}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ccc; border-radius: 4px;">
-        <div>
-            <div><strong>${item.name}</strong></div>
-            <div>Soni: ${item.quantity}</div>
-            <div>Narxi: ${item.price.toLocaleString('uz')} so'm</div>
-        </div>
-    </div>
-`).join("");
-
-
                     return `
                         <div style="text-align: left; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
                             <div style="font-weight: bold; font-size: 16px;">Buyurtma ID raqami ${order.id}</div>
@@ -293,21 +281,17 @@
                                 <span style="background-color: #eee; padding: 3px 8px; border-radius: 6px; font-weight: bold;">
                                     ${latestStatus.status === 'BEING_COLLECTED' ? 'Mahsulotlar yig‘ilmoqda' :
                         latestStatus.status === 'ON_THE_WAY' ? 'Yo‘lda' :
-                            latestStatus.status === 'TAKE_IT_AWAY' ? 'Olib ketishingiz mumkin' : 'Xaridorga berilgan'}
+                            latestStatus.status === 'TAKE_IT_AWAY' ? 'Olib ketishingiz mumkin' :
+                                'Xaridorga berilgan'}
                                 </span>
                                 <span style="font-size: 12px; color: #888;"> Yangi holat: ${new Date(latestStatus.statusUpdatedAt).toLocaleString('uz')}</span>
                             </div>
                             ${statusHistoryHtml ? `<div class="status-history"><strong>Holat tarixi:</strong><br>${statusHistoryHtml}</div>` : ''}
                             <div style="margin-top: 10px;"><strong>Yetkazib berish sanasi:</strong> ${order.deliveryDate ? new Date(order.deliveryDate).toLocaleString('uz') : 'Belgilanmagan'}</div>
-                            <div><strong>Buyurtma sanasi:</strong> ${new Date(order.orderDate).toLocaleString('uz')}</div>
+                            <div style="margin-top: 10px;"><strong>Buyurtma sanasi:</strong> ${new Date(order.orderDate).toLocaleString('uz')}</div>
                             <div><strong>Buyurtma qiymati:</strong> ${totalPrice.toLocaleString('uz')} so'm</div>
-                            <div style="margin-top: 10px;">
-                                <button onclick="toggleItems('${order.id}')" style="background: #eee; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
-                                    Mahsulotlarni ko‘rsatish
-                                </button>
-                            </div>
-                            <div id="order-items-${order.id}" style="display: none; margin-top: 15px;">
-                                ${itemHtml}
+                            <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px; font-size: 14px;">
+                                ${order.items.length} mahsulot
                             </div>
                         </div>
                     `;
@@ -319,15 +303,6 @@
                 console.error('Xato:', error);
                 contentArea.innerHTML = `<p>Buyurtmalarni yuklashda xato yuz berdi.</p>`;
             });
-    }
-
-    function toggleItems(orderId) {
-        const section = document.getElementById(`order-items-${orderId}`);
-        const isVisible = section.style.display === 'block';
-        section.style.display = isVisible ? 'none' : 'block';
-
-        const btn = section.previousElementSibling.querySelector("button");
-        btn.textContent = isVisible ? 'Mahsulotlarni ko‘rsatish' : 'Yopish';
     }
 
     function showSharh(type, btn) {

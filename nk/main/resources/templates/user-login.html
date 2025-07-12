@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Axios CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.2/dist/axios.min.js"></script>
+
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- CSRF meta -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
+    <style>
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .error-shake { animation: shake 0.3s ease-in-out; }
+        .link-hover { transition: color 0.3s ease, transform 0.3s ease; }
+        .link-hover:hover { color: #1d4ed8; transform: translateX(5px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center min-h-screen">
+<div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md fade-in transform transition-all duration-300 hover:shadow-blue-200">
+    <h2 class="text-3xl font-bold text-center mb-6 text-gray-800 border-b-2 border-blue-200 pb-2">Tizimga Kirish</h2>
+    <form id="loginForm" method="post" novalidate class="space-y-4">
+        <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+
+        <!-- Email -->
+        <div class="mb-4">
+            <label class="block text-gray-700 mb-2 font-semibold" for="email">Email</label>
+            <input type="email" id="email" name="email"
+                   class="w-full p-3 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 placeholder-gray-400"
+                   placeholder="you@gmail.com"
+                   pattern="^[\\w.%+-]+@gmail\\.com$"
+                   title="Faqat gmail.com manzili kiritilishi kerak"
+                   required />
+            <p id="emailError" class="text-red-500 text-sm mt-1 hidden"></p>
+        </div>
+
+        <!-- Code -->
+        <div id="codeSection" class="mb-4 invisible">
+            <label class="block text-gray-700 mb-2 font-semibold" for="code">Tasdiqlash Kodi</label>
+            <input type="text" id="code" name="code"
+                   class="w-full p-3 border rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 placeholder-gray-400"
+                   placeholder="6 xonali kod" maxlength="6" />
+            <p id="codeError" class="text-red-500 text-sm mt-1 hidden"></p>
+            <p id="countdown" class="text-gray-600 text-sm mt-2"></p>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" id="submitButton"
+                class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-all duration-300 disabled:bg-blue-300 transform hover:scale-105"
+                disabled>
+            <span id="buttonText">Tasdiqlash Kodini Olish</span>
+        </button>
+
+        <!-- Register Link -->
+        <div class="mt-4 text-center">
+            <p class="text-gray-600">Ro‘yhatdan o‘tmaganmisiz?</p>
+            <a href="/register" class="link-hover text-blue-500 font-medium mt-2 inline-block">Ro‘yhatdan o‘tish</a>
+        </div>
+
+        <!-- Resend -->
+        <button type="button" id="resendButton"
+                class="w-full bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 transition-all duration-300 mt-4 hidden transform hover:scale-105"
+                onclick="resendVerificationCode()">Qaytadan Tasdiqlash Kodini Yuborish</button>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function () {
+        const csrfToken = $('meta[name="_csrf"]').attr('content');
+        const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+        axios.defaults.headers.common[csrfHeader] = csrfToken;
+        axios.defaults.withCredentials = true;
+
+        const emailInput = $('#email');
+        const codeInput = $('#code');
+        const codeSection = $('#codeSection');
+        const submitButton = $('#submitButton');
+        const resendButton = $('#resendButton');
+        const buttonText = $('#buttonText');
+        const emailError = $('#emailError');
+        const codeError = $('#codeError');
+        const countdownElement = $('#countdown');
+
+        let codeSent = false;
+        let expiryDate = null;
+
+        function startCountdown(expiry) {
+            expiryDate = new Date(expiry).getTime();
+            const interval = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = expiryDate - now;
+                if (distance <= 0) {
+                    clearInterval(interval);
+                    countdownElement.text("Kod muddati o'tdi.");
+                    resendButton.removeClass('hidden');
+                    codeInput.prop('disabled', true);
+                    submitButton.prop('disabled', true);
+                } else {
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                    countdownElement.text(`Qoldi: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+                }
+            }, 1000);
+        }
+
+        window.resendVerificationCode = async function () {
+            resendButton.prop('disabled', true);
+            try {
+                const response = await axios.post('/api/send-sms', { email: emailInput.val() });
+                if (response.data.success) {
+                    codeSent = true;
+                    codeSection.removeClass('invisible');
+                    emailInput.prop('disabled', true);
+                    buttonText.text('Tasdiqlash');
+                    submitButton.prop('disabled', false);
+                    codeInput.prop('disabled', false);
+                    resendButton.addClass('hidden');
+                    startCountdown(response.data.expiryDate);
+                } else {
+                    emailError.text(response.data.message).removeClass('hidden');
+                }
+            } catch (error) {
+                emailError.text(error.response?.data?.message || 'Xatolik yuz berdi').removeClass('hidden');
+            }
+            resendButton.prop('disabled', false);
+        };
+
+        emailInput.on('input', async function () {
+            const email = emailInput.val().trim();
+            submitButton.prop('disabled', true);
+            emailError.addClass('hidden');
+
+            if (!email.endsWith('@gmail.com')) {
+                emailError.text('Faqat gmail.com manzili bo‘lishi kerak!').removeClass('hidden');
+                return;
+            }
+
+            try {
+                const response = await axios.post('/api/check-email', { email });
+                if (response.data.exists) {
+                    submitButton.prop('disabled', false);
+                } else {
+                    emailError.text(response.data.message).removeClass('hidden');
+                }
+            } catch (error) {
+                emailError.text(error.response?.data?.message || 'Xatolik yuz berdi!').removeClass('hidden');
+            }
+        });
+
+        $('#loginForm').on('submit', async function (e) {
+            e.preventDefault();
+            submitButton.prop('disabled', true);
+            buttonText.text('Yuklanmoqda...');
+
+            if (!codeSent) {
+                try {
+                    const response = await axios.post('/api/send-sms', { email: emailInput.val() });
+                    if (response.data.success) {
+                        codeSent = true;
+                        codeSection.removeClass('invisible');
+                        emailInput.prop('disabled', true);
+                        buttonText.text('Tasdiqlash');
+                        submitButton.prop('disabled', false);
+                        codeInput.prop('disabled', false);
+                        startCountdown(response.data.expiryDate);
+                    } else {
+                        emailError.text(response.data.message).removeClass('hidden');
+                        buttonText.text('Tasdiqlash Kodini Olish');
+                        submitButton.prop('disabled', false);
+                    }
+                } catch (error) {
+                    emailError.text(error.response?.data?.message || 'Xatolik yuz berdi!').removeClass('hidden');
+                    buttonText.text('Tasdiqlash Kodini Olish');
+                    submitButton.prop('disabled', false);
+                }
+            } else {
+                const code = codeInput.val().trim();
+                if (code.length !== 6) {
+                    codeError.text('6 xonali kod kiriting!').removeClass('hidden');
+                    buttonText.text('Tasdiqlash');
+                    submitButton.prop('disabled', false);
+                    return;
+                }
+
+                try {
+                    const response = await axios.post('/api/verify-sms', {
+                        email: emailInput.val(),
+                        code: code
+                    });
+
+                    if (response.data.success) {
+                        window.location.href = '/home';
+                    } else {
+                        codeError.text(response.data.message).removeClass('hidden');
+                        buttonText.text('Tasdiqlash');
+                        submitButton.prop('disabled', false);
+                    }
+                } catch (error) {
+                    codeError.text(error.response?.data?.message || 'Xatolik yuz berdi!').removeClass('hidden');
+                    buttonText.text('Tasdiqlash');
+                    submitButton.prop('disabled', false);
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

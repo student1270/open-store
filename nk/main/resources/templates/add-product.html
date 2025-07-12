@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="uz" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' – OpenStore'">Mahsulot Qo'shish – OpenStore</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .category-box {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+        }
+        .category-item {
+            padding: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .category-item:hover {
+            background-color: #f7fafc;
+        }
+        .selected-category {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #ebf8ff;
+            border: 1px solid #4299e1;
+            border-radius: 0.25rem;
+            margin-top: 0.5rem;
+        }
+        .status-message {
+            margin-left: 10px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .hidden {
+            display: none;
+        }
+        .back-btn {
+            padding: 5px 10px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .back-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-black min-h-screen">
+<div id="productModal" class="modal" style="display: flex;">
+    <div class="modal-content">
+        <h3 class="text-xl font-bold mb-4 text-gray-800">Mahsulot qo'shish</h3>
+        <form id="productForm" th:action="@{/order-admin/add-product}" method="post" enctype="multipart/form-data">
+            <!-- Rasm yuklash qismi -->
+            <div class="mb-4">
+                <label class="block text-gray-700">Rasm yuklash</label>
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">📎</span>
+                    <input type="file" id="productImage" name="image" class="..." accept="image/jpeg,image/png,image/jpg,image/webp" required>
+                    <span id="statusMessage" class="status-message"></span>
+                </div>
+                <span id="imageName" class="text-sm text-gray-500"></span>
+            </div>
+
+            <!-- Mahsulot nomi -->
+            <div class="mb-4">
+                <label for="productName" class="block text-gray-700">Nomi *</label>
+                <input type="text" id="productName" name="name" class="w-full mt-1 p-2 border rounded" required>
+            </div>
+
+            <!-- Narxi -->
+            <div class="mb-4">
+                <label for="productPrice" class="block text-gray-700">Narxi (so'm) *</label>
+                <input type="number" id="productPrice" name="price" min="0" class="w-full mt-1 p-2 border rounded" required>
+            </div>
+
+            <!-- Soni -->
+            <div class="mb-4">
+                <label for="productQuantity" class="block text-gray-700">Soni *</label>
+                <input type="number" id="productQuantity" name="quantity" min="1" class="w-full mt-1 p-2 border rounded" required>
+            </div>
+
+            <!-- Tavsif -->
+            <div class="mb-4">
+                <label for="productDescription" class="block text-gray-700">Tavsif</label>
+                <textarea id="productDescription" name="description" class="w-full mt-1 p-2 border rounded" rows="3"></textarea>
+            </div>
+
+            <!-- Kategoriya tanlash -->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Kategoriya tanlang *</label>
+
+                <!-- 1. Asosiy kategoriyalar -->
+                <div id="mainCategories" class="category-box">
+                    <div class="category-item" data-category="elektronika">Elektronika</div>
+                    <div class="category-item" data-category="maishiy">Maishiy texnika</div>
+                    <div class="category-item" data-category="qurilish">Qurilish va ta'mirlash</div>
+                    <div class="category-item" data-category="poyabzal">Poyabzallar</div>
+                    <div class="category-item" data-category="salomatlik">Salomatlik</div>
+                    <div class="category-item" data-category="uyrozgor">Uy-roʻzgʻor buyumlari</div>
+                    <div class="category-item" data-category="kiyim">Kiyim</div>
+                    <div class="category-item" data-category="gozallik">Goʻzallik va parvarish</div>
+                    <div class="category-item" data-category="aksessuar">Aksessuarlar</div>
+                </div>
+
+                <!-- 2. Subkategoriyalar (Elektronika) -->
+                <div id="subCategoriesElektronika" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="smartfonlar">Smartfonlar va telefonlar</div>
+                    <div class="category-item" data-category="noutbuklar">Noutbuklar, planshetlar va elektron kitoblar</div>
+                    <div class="category-item" data-category="televizorlar">Televizorlar va videotexnikalar</div>
+                </div>
+
+                <!-- 2. Subkategoriyalar (Maishiy texnika) -->
+                <div id="subCategoriesMaishiy" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="katta">Katta maishiy texnika</div>
+                    <div class="category-item" data-category="uy">Uy uchun texnika</div>
+                </div>
+
+                <!-- 2. Subkategoriyalar (Qurilish va ta'mirlash) -->
+                <div id="subCategoriesQurilish" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="asboblar">Asboblar</div>
+                    <div class="category-item" data-category="materiallar">Qurilish-pardoz materiallari</div>
+                </div>
+
+                <!-- 2. Subkategoriyalar (Poyabzallar) -->
+                <div id="subCategoriesPoyabzal" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="erkak">Erkaklar poyabzali</div>
+                    <div class="category-item" data-category="ayol">Ayollar poyabzali</div>
+                </div>
+
+                <!-- 2. Subkategoriyalar (Salomatlik) -->
+                <div id="subCategoriesSalomatlik" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="vitaminlar">Vitaminlar va BFQlar</div>
+                    <div class="category-item" data-category="sport">Sportchilar uchun ozuqalar</div>
+                </div>
+
+                <!-- 2. Subkategoriyalar (Uy-roʻzgʻor buyumlari) -->
+                <div id="subCategoriesUyrozgor" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="oshxona">Oshxona buyumlari</div>
+                    <div class="category-item" data-category="mebel">Mebel</div>
+                </div>
+
+                <!-- 2. Subkategoriyalar (Kiyim) -->
+                <div id="subCategoriesKiyim" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="ayolk">Ayollar kiyimi</div>
+                    <div class="category-item" data-category="erkakk">Erkaklar kiyimi</div>
+                </div>
+
+                <!-- 2. Subkategoriyalar (Goʻzallik va parvarish) -->
+                <div id="subCategoriesGozallik" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="makiyaj">Makiyaj</div>
+                    <div class="category-item" data-category="yuz">Yuz parvarishi</div>
+                </div>
+
+                <!-- 2. Subkategoriyalar (Aksessuarlar) -->
+                <div id="subCategoriesAksessuar" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="ayolaks">Ayollar aksessuarlari</div>
+                    <div class="category-item" data-category="erkakaks">Erkaklar aksessuarlari</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Smartfonlar va telefonlar) -->
+                <div id="finalSubCategoriesSmartfonlar" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="smartfon_aks">Smartfonlar uchun aksessuarlar</div>
+                    <div class="category-item" data-category="knopka">Knopkali telefonlar</div>
+                    <div class="category-item" data-category="smartfon">Smartfonlar</div>
+                    <div class="category-item" data-category="ehtiyot">Ehtiyot qismlar va ta'mirlash</div>
+                    <div class="category-item" data-category="statsionar">Statsionar telefonlar</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Noutbuklar, planshetlar va elektron kitoblar) -->
+                <div id="finalSubCategoriesNoutbuklar" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="noutbuk">Noutbuklar</div>
+                    <div class="category-item" data-category="planshet">Planshetlar va elektron kitoblar</div>
+                    <div class="category-item" data-category="noutbuk_aks">Noutbuk uchun aksessuarlar</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Televizorlar va videotexnikalar) -->
+                <div id="finalSubCategoriesTelevizorlar" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="kabellar">Kabellar va adapterlar</div>
+                    <div class="category-item" data-category="televizor">Televizorlar</div>
+                    <div class="category-item" data-category="tyuner">Tyuner va resiverlar</div>
+                    <div class="category-item" data-category="televizor_aks">Televizor aksessuarlari</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Katta maishiy texnika) -->
+                <div id="finalSubCategoriesKatta" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="suv">Suv uchun kulerlar va aksessuarlar</div>
+                    <div class="category-item" data-category="dudburon">Oshxona dudburonlari</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Uy uchun texnika) -->
+                <div id="finalSubCategoriesUy" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="chang">Changyutgichlar va aksessuarlar</div>
+                    <div class="category-item" data-category="dazmol">Dazmollar va bugʻlagichlar</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Asboblar) -->
+                <div id="finalSubCategoriesAsboblar" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="elektro">Elektr asboblar</div>
+                    <div class="category-item" data-category="kalit">Kalitlar va otvyotkalar</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Qurilish-pardoz materiallari) -->
+                <div id="finalSubCategoriesMateriallar" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="aks_sarflov">Qurilish-pardoz ishlar uchun aksessuarlar va sarflov materiallari</div>
+                    <div class="category-item" data-category="lak">Laklar va Boʻyoqlar</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Erkaklar poyabzali) -->
+                <div id="finalSubCategoriesErkak" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="erkak_kross">Erkaklar krossovkalari</div>
+                    <div class="category-item" data-category="mokasin">Mokasinlar</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Ayollar poyabzali) -->
+                <div id="finalSubCategoriesAyol" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="ayol_kross">Ayollar krossovkalari</div>
+                    <div class="category-item" data-category="tufli">Tufli</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Vitaminlar va BFQlar) -->
+                <div id="finalSubCategoriesVitaminlar" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="a_e">A va E vitaminlari</div>
+                    <div class="category-item" data-category="hazm">Ovqat hazm qilish tizimi uchun</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Sportchilar uchun ozuqalar) -->
+                <div id="finalSubCategoriesSport" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="gayner">Gaynerlar va oqsillar</div>
+                    <div class="category-item" data-category="bcaa">BCAA va aminokislotalar</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Oshxona buyumlari) -->
+                <div id="finalSubCategoriesOshxona" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="anjom">Oshxona anjomlari</div>
+                    <div class="category-item" data-category="saqlash">Oziq-ovqat mahsulotlarini saqlash</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Mebel) -->
+                <div id="finalSubCategoriesMebel" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="shkaflar">Shkaflar, tumbalar, komodlar</div>
+                    <div class="category-item" data-category="javon">Poyabzal uchun javonlar</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Ayollar kiyimi) -->
+                <div id="finalSubCategoriesAyolk" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="ichki">Ichki kiyim</div>
+                    <div class="category-item" data-category="libos">Liboslar va sarafanlar</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Erkaklar kiyimi) -->
+                <div id="finalSubCategoriesErkakk" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="futbolka">Futbolkalar va polo</div>
+                    <div class="category-item" data-category="paypoq">Paypoqlar va getrlar</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Makiyaj) -->
+                <div id="finalSubCategoriesMakiyaj" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="koz">Koʻzlar</div>
+                    <div class="category-item" data-category="yuz_m">Yuz</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Yuz parvarishi) -->
+                <div id="finalSubCategoriesYuz" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="niqob">Niqoblar</div>
+                    <div class="category-item" data-category="namlash">Namlash va oziqlantirish</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Ayollar aksessuarlari) -->
+                <div id="finalSubCategoriesAyolaks" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="bijuteriya">Bijuteriyalar</div>
+                    <div class="category-item" data-category="sumka">Sumkalar va ryukzaklar</div>
+                </div>
+
+                <!-- 3. Yakuniy subkategoriyalar (Erkaklar aksessuarlari) -->
+                <div id="finalSubCategoriesErkakaks" class="category-box hidden mt-4">
+                    <div class="category-item" data-category="kozoynak">Koʻzoynak</div>
+                    <div class="category-item" data-category="soat">Soatlar va qayishlar</div>
+                </div>
+
+                <!-- Tanlangan kategoriya ko'rinishi -->
+                <div id="selectedCategoryBox" class="hidden mt-4">
+                    <span id="selectedCategoryText" class="selected-category"></span>
+                    <button id="changeCategoryBtn" type="button" class="ml-3 px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600">
+                        Qayta tanlash
+                    </button>
+                    <input type="hidden" id="selectedCategoryValue" name="category">
+                </div>
+            </div>
+
+            <button type="submit" id="uploadButton" class="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 hidden">Yuklash</button>
+        </form>
+        <button id="closeModal" class="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">Yopish</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const productModal = document.getElementById('productModal');
+        const closeModal = document.getElementById('closeModal');
+        const productImage = document.getElementById('productImage');
+        const statusMessage = document.getElementById('statusMessage');
+        const imageName = document.getElementById('imageName');
+        const uploadButton = document.getElementById('uploadButton');
+        const productName = document.getElementById('productName');
+        const productPrice = document.getElementById('productPrice');
+        const productQuantity = document.getElementById('productQuantity');
+        const productDescription = document.getElementById('productDescription');
+        const mainCategories = document.getElementById('mainCategories');
+        const subCategoriesElektronika = document.getElementById('subCategoriesElektronika');
+        const finalSubCategoriesSmartfonlar = document.getElementById('finalSubCategoriesSmartfonlar');
+        const selectedCategoryBox = document.getElementById('selectedCategoryBox');
+        const selectedCategoryText = document.getElementById('selectedCategoryText');
+        const selectedCategoryValue = document.getElementById('selectedCategoryValue');
+        const changeCategoryBtn = document.getElementById('changeCategoryBtn');
+
+        window.addEventListener('load', () => {
+            productModal.style.display = 'flex';
+        });
+
+        closeModal.addEventListener('click', () => {
+            productModal.style.display = 'none';
+            resetForm();
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === productModal) {
+                productModal.style.display = 'none';
+                resetForm();
+            }
+        });
+
+        mainCategories.addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const category = e.target.getAttribute('data-category');
+                if (category === 'elektronika') {
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.remove('hidden');
+                } else if (category === 'maishiy') {
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesMaishiy').classList.remove('hidden');
+                } else if (category === 'qurilish') {
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesQurilish').classList.remove('hidden');
+                } else if (category === 'poyabzal') {
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesPoyabzal').classList.remove('hidden');
+                } else if (category === 'salomatlik') {
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesSalomatlik').classList.remove('hidden');
+                } else if (category === 'uyrozgor') {
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesUyrozgor').classList.remove('hidden');
+                } else if (category === 'kiyim') {
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesKiyim').classList.remove('hidden');
+                } else if (category === 'gozallik') {
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesGozallik').classList.remove('hidden');
+                } else if (category === 'aksessuar') {
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesAksessuar').classList.remove('hidden');
+                }
+            }
+        });
+
+        subCategoriesElektronika.addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const subCategory = e.target.getAttribute('data-category');
+                if (subCategory === 'smartfonlar') {
+                    subCategoriesElektronika.classList.add('hidden');
+                    finalSubCategoriesSmartfonlar.classList.remove('hidden');
+                } else if (subCategory === 'noutbuklar') {
+                    subCategoriesElektronika.classList.add('hidden');
+                    document.getElementById('finalSubCategoriesNoutbuklar').classList.remove('hidden');
+                } else if (subCategory === 'televizorlar') {
+                    subCategoriesElektronika.classList.add('hidden');
+                    document.getElementById('finalSubCategoriesTelevizorlar').classList.remove('hidden');
+                }
+            }
+        });
+
+        document.getElementById('subCategoriesMaishiy').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const subCategory = e.target.getAttribute('data-category');
+                if (subCategory === 'katta') {
+                    document.getElementById('subCategoriesMaishiy').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesKatta').classList.remove('hidden');
+                } else if (subCategory === 'uy') {
+                    document.getElementById('subCategoriesMaishiy').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesUy').classList.remove('hidden');
+                }
+            }
+        });
+
+        document.getElementById('subCategoriesQurilish').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const subCategory = e.target.getAttribute('data-category');
+                if (subCategory === 'asboblar') {
+                    document.getElementById('subCategoriesQurilish').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesAsboblar').classList.remove('hidden');
+                } else if (subCategory === 'materiallar') {
+                    document.getElementById('subCategoriesQurilish').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesMateriallar').classList.remove('hidden');
+                }
+            }
+        });
+
+        document.getElementById('subCategoriesPoyabzal').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const subCategory = e.target.getAttribute('data-category');
+                if (subCategory === 'erkak') {
+                    document.getElementById('subCategoriesPoyabzal').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesErkak').classList.remove('hidden');
+                } else if (subCategory === 'ayol') {
+                    document.getElementById('subCategoriesPoyabzal').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesAyol').classList.remove('hidden');
+                }
+            }
+        });
+
+        document.getElementById('subCategoriesSalomatlik').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const subCategory = e.target.getAttribute('data-category');
+                if (subCategory === 'vitaminlar') {
+                    document.getElementById('subCategoriesSalomatlik').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesVitaminlar').classList.remove('hidden');
+                } else if (subCategory === 'sport') {
+                    document.getElementById('subCategoriesSalomatlik').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesSport').classList.remove('hidden');
+                }
+            }
+        });
+
+        document.getElementById('subCategoriesUyrozgor').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const subCategory = e.target.getAttribute('data-category');
+                if (subCategory === 'oshxona') {
+                    document.getElementById('subCategoriesUyrozgor').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesOshxona').classList.remove('hidden');
+                } else if (subCategory === 'mebel') {
+                    document.getElementById('subCategoriesUyrozgor').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesMebel').classList.remove('hidden');
+                }
+            }
+        });
+
+        document.getElementById('subCategoriesKiyim').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const subCategory = e.target.getAttribute('data-category');
+                if (subCategory === 'ayolk') {
+                    document.getElementById('subCategoriesKiyim').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesAyolk').classList.remove('hidden');
+                } else if (subCategory === 'erkakk') {
+                    document.getElementById('subCategoriesKiyim').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesErkakk').classList.remove('hidden');
+                }
+            }
+        });
+
+        document.getElementById('subCategoriesGozallik').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const subCategory = e.target.getAttribute('data-category');
+                if (subCategory === 'makiyaj') {
+                    document.getElementById('subCategoriesGozallik').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesMakiyaj').classList.remove('hidden');
+                } else if (subCategory === 'yuz') {
+                    document.getElementById('subCategoriesGozallik').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesYuz').classList.remove('hidden');
+                }
+            }
+        });
+
+        document.getElementById('subCategoriesAksessuar').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const subCategory = e.target.getAttribute('data-category');
+                if (subCategory === 'ayolaks') {
+                    document.getElementById('subCategoriesAksessuar').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesAyolaks').classList.remove('hidden');
+                } else if (subCategory === 'erkakaks') {
+                    document.getElementById('subCategoriesAksessuar').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesErkakaks').classList.remove('hidden');
+                }
+            }
+        });
+
+        finalSubCategoriesSmartfonlar.addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'smartfon') {
+                    selectedCategoryText.textContent = "Elektronika > Smartfonlar va telefonlar > Smartfonlar";
+                    selectedCategoryValue.value = "elektronika:smartfonlar:smartfon";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.add('hidden');
+                    finalSubCategoriesSmartfonlar.classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'smartfon_aks') {
+                    selectedCategoryText.textContent = "Elektronika > Smartfonlar va telefonlar > Smartfonlar uchun aksessuarlar";
+                    selectedCategoryValue.value = "elektronika:smartfonlar:smartfon_aks";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.add('hidden');
+                    finalSubCategoriesSmartfonlar.classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'knopka') {
+                    selectedCategoryText.textContent = "Elektronika > Smartfonlar va telefonlar > Knopkali telefonlar";
+                    selectedCategoryValue.value = "elektronika:smartfonlar:knopka";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.add('hidden');
+                    finalSubCategoriesSmartfonlar.classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'ehtiyot') {
+                    selectedCategoryText.textContent = "Elektronika > Smartfonlar va telefonlar > Ehtiyot qismlar va ta'mirlash";
+                    selectedCategoryValue.value = "elektronika:smartfonlar:ehtiyot";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.add('hidden');
+                    finalSubCategoriesSmartfonlar.classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'statsionar') {
+                    selectedCategoryText.textContent = "Elektronika > Smartfonlar va telefonlar > Statsionar telefonlar";
+                    selectedCategoryValue.value = "elektronika:smartfonlar:statsionar";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.add('hidden');
+                    finalSubCategoriesSmartfonlar.classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesNoutbuklar').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'noutbuk') {
+                    selectedCategoryText.textContent = "Elektronika > Noutbuklar, planshetlar va elektron kitoblar > Noutbuklar";
+                    selectedCategoryValue.value = "elektronika:noutbuklar:noutbuk";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.add('hidden');
+                    document.getElementById('finalSubCategoriesNoutbuklar').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'planshet') {
+                    selectedCategoryText.textContent = "Elektronika > Noutbuklar, planshetlar va elektron kitoblar > Planshetlar va elektron kitoblar";
+                    selectedCategoryValue.value = "elektronika:noutbuklar:planshet";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.add('hidden');
+                    document.getElementById('finalSubCategoriesNoutbuklar').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'noutbuk_aks') {
+                    selectedCategoryText.textContent = "Elektronika > Noutbuklar, planshetlar va elektron kitoblar > Noutbuk uchun aksessuarlar";
+                    selectedCategoryValue.value = "elektronika:noutbuklar:noutbuk_aks";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.add('hidden');
+                    document.getElementById('finalSubCategoriesNoutbuklar').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesTelevizorlar').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'kabellar') {
+                    selectedCategoryText.textContent = "Elektronika > Televizorlar va videotexnikalar > Kabellar va adapterlar";
+                    selectedCategoryValue.value = "elektronika:televizorlar:kabellar";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.add('hidden');
+                    document.getElementById('finalSubCategoriesTelevizorlar').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'televizor') {
+                    selectedCategoryText.textContent = "Elektronika > Televizorlar va videotexnikalar > Televizorlar";
+                    selectedCategoryValue.value = "elektronika:televizorlar:televizor";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.add('hidden');
+                    document.getElementById('finalSubCategoriesTelevizorlar').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'tyuner') {
+                    selectedCategoryText.textContent = "Elektronika > Televizorlar va videotexnikalar > Tyuner va resiverlar";
+                    selectedCategoryValue.value = "elektronika:televizorlar:tyuner";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.add('hidden');
+                    document.getElementById('finalSubCategoriesTelevizorlar').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'televizor_aks') {
+                    selectedCategoryText.textContent = "Elektronika > Televizorlar va videotexnikalar > Televizor aksessuarlari";
+                    selectedCategoryValue.value = "elektronika:televizorlar:televizor_aks";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    subCategoriesElektronika.classList.add('hidden');
+                    document.getElementById('finalSubCategoriesTelevizorlar').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesKatta').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'suv') {
+                    selectedCategoryText.textContent = "Maishiy texnika > Katta maishiy texnika > Suv uchun kulerlar va aksessuarlar";
+                    selectedCategoryValue.value = "maishiy:katta:suv";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesMaishiy').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesKatta').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'dudburon') {
+                    selectedCategoryText.textContent = "Maishiy texnika > Katta maishiy texnika > Oshxona dudburonlari";
+                    selectedCategoryValue.value = "maishiy:katta:dudburon";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesMaishiy').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesKatta').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesUy').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'chang') {
+                    selectedCategoryText.textContent = "Maishiy texnika > Uy uchun texnika > Changyutgichlar va aksessuarlar";
+                    selectedCategoryValue.value = "maishiy:uy:chang";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesMaishiy').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesUy').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'dazmol') {
+                    selectedCategoryText.textContent = "Maishiy texnika > Uy uchun texnika > Dazmollar va bugʻlagichlar";
+                    selectedCategoryValue.value = "maishiy:uy:dazmol";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesMaishiy').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesUy').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesAsboblar').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'elektro') {
+                    selectedCategoryText.textContent = "Qurilish va ta'mirlash > Asboblar > Elektr asboblar";
+                    selectedCategoryValue.value = "qurilish:asboblar:elektro";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesQurilish').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesAsboblar').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'kalit') {
+                    selectedCategoryText.textContent = "Qurilish va ta'mirlash > Asboblar > Kalitlar va otvyotkalar";
+                    selectedCategoryValue.value = "qurilish:asboblar:kalit";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesQurilish').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesAsboblar').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesMateriallar').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'aks_sarflov') {
+                    selectedCategoryText.textContent = "Qurilish va ta'mirlash > Qurilish-pardoz materiallari > Qurilish-pardoz ishlar uchun aksessuarlar va sarflov materiallari";
+                    selectedCategoryValue.value = "qurilish:materiallar:aks_sarflov";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesQurilish').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesMateriallar').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'lak') {
+                    selectedCategoryText.textContent = "Qurilish va ta'mirlash > Qurilish-pardoz materiallari > Laklar va Boʻyoqlar";
+                    selectedCategoryValue.value = "qurilish:materiallar:lak";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesQurilish').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesMateriallar').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesErkak').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'erkak_kross') {
+                    selectedCategoryText.textContent = "Poyabzallar > Erkaklar poyabzali > Erkaklar krossovkalari";
+                    selectedCategoryValue.value = "poyabzal:erkak:erkak_kross";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesPoyabzal').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesErkak').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'mokasin') {
+                    selectedCategoryText.textContent = "Poyabzallar > Erkaklar poyabzali > Mokasinlar";
+                    selectedCategoryValue.value = "poyabzal:erkak:mokasin";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesPoyabzal').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesErkak').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesAyol').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'ayol_kross') {
+                    selectedCategoryText.textContent = "Poyabzallar > Ayollar poyabzali > Ayollar krossovkalari";
+                    selectedCategoryValue.value = "poyabzal:ayol:ayol_kross";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesPoyabzal').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesAyol').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'tufli') {
+                    selectedCategoryText.textContent = "Poyabzallar > Ayollar poyabzali > Tufli";
+                    selectedCategoryValue.value = "poyabzal:ayol:tufli";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesPoyabzal').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesAyol').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesVitaminlar').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'a_e') {
+                    selectedCategoryText.textContent = "Salomatlik > Vitaminlar va BFQlar > A va E vitaminlari";
+                    selectedCategoryValue.value = "salomatlik:vitaminlar:a_e";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesSalomatlik').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesVitaminlar').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'hazm') {
+                    selectedCategoryText.textContent = "Salomatlik > Vitaminlar va BFQlar > Ovqat hazm qilish tizimi uchun";
+                    selectedCategoryValue.value = "salomatlik:vitaminlar:hazm";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesSalomatlik').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesVitaminlar').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesSport').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'gayner') {
+                    selectedCategoryText.textContent = "Salomatlik > Sportchilar uchun ozuqalar > Gaynerlar va oqsillar";
+                    selectedCategoryValue.value = "salomatlik:sport:gayner";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesSalomatlik').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesSport').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'bcaa') {
+                    selectedCategoryText.textContent = "Salomatlik > Sportchilar uchun ozuqalar > BCAA va aminokislotalar";
+                    selectedCategoryValue.value = "salomatlik:sport:bcaa";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesSalomatlik').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesSport').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesOshxona').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'anjom') {
+                    selectedCategoryText.textContent = "Uy-roʻzgʻor buyumlari > Oshxona buyumlari > Oshxona anjomlari";
+                    selectedCategoryValue.value = "uyrozgor:oshxona:anjom";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesUyrozgor').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesOshxona').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'saqlash') {
+                    selectedCategoryText.textContent = "Uy-roʻzgʻor buyumlari > Oshxona buyumlari > Oziq-ovqat mahsulotlarini saqlash";
+                    selectedCategoryValue.value = "uyrozgor:oshxona:saqlash";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesUyrozgor').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesOshxona').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesMebel').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'shkaflar') {
+                    selectedCategoryText.textContent = "Uy-roʻzgʻor buyumlari > Mebel > Shkaflar, tumbalar, komodlar";
+                    selectedCategoryValue.value = "uyrozgor:mebel:shkaflar";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesUyrozgor').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesMebel').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'javon') {
+                    selectedCategoryText.textContent = "Uy-roʻzgʻor buyumlari > Mebel > Poyabzal uchun javonlar";
+                    selectedCategoryValue.value = "uyrozgor:mebel:javon";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesUyrozgor').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesMebel').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesAyolk').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'ichki') {
+                    selectedCategoryText.textContent = "Kiyim > Ayollar kiyimi > Ichki kiyim";
+                    selectedCategoryValue.value = "kiyim:ayolk:ichki";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesKiyim').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesAyolk').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'libos') {
+                    selectedCategoryText.textContent = "Kiyim > Ayollar kiyimi > Liboslar va sarafanlar";
+                    selectedCategoryValue.value = "kiyim:ayolk:libos";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesKiyim').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesAyolk').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesErkakk').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'futbolka') {
+                    selectedCategoryText.textContent = "Kiyim > Erkaklar kiyimi > Futbolkalar va polo";
+                    selectedCategoryValue.value = "kiyim:erkakk:futbolka";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesKiyim').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesErkakk').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'paypoq') {
+                    selectedCategoryText.textContent = "Kiyim > Erkaklar kiyimi > Paypoqlar va getrlar";
+                    selectedCategoryValue.value = "kiyim:erkakk:paypoq";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesKiyim').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesErkakk').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesMakiyaj').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'koz') {
+                    selectedCategoryText.textContent = "Goʻzallik va parvarish > Makiyaj > Koʻzlar";
+                    selectedCategoryValue.value = "gozallik:makiyaj:koz";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesGozallik').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesMakiyaj').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'yuz_m') {
+                    selectedCategoryText.textContent = "Goʻzallik va parvarish > Makiyaj > Yuz";
+                    selectedCategoryValue.value = "gozallik:makiyaj:yuz_m";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesGozallik').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesMakiyaj').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesYuz').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'niqob') {
+                    selectedCategoryText.textContent = "Goʻzallik va parvarish > Yuz parvarishi > Niqoblar";
+                    selectedCategoryValue.value = "gozallik:yuz:niqob";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesGozallik').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesYuz').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'namlash') {
+                    selectedCategoryText.textContent = "Goʻzallik va parvarish > Yuz parvarishi > Namlash va oziqlantirish";
+                    selectedCategoryValue.value = "gozallik:yuz:namlash";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesGozallik').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesYuz').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesAyolaks').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'bijuteriya') {
+                    selectedCategoryText.textContent = "Aksessuarlar > Ayollar aksessuarlari > Bijuteriyalar";
+                    selectedCategoryValue.value = "aksessuar:ayolaks:bijuteriya";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesAksessuar').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesAyolaks').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'sumka') {
+                    selectedCategoryText.textContent = "Aksessuarlar > Ayollar aksessuarlari > Sumkalar va ryukzaklar";
+                    selectedCategoryValue.value = "aksessuar:ayolaks:sumka";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesAksessuar').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesAyolaks').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        document.getElementById('finalSubCategoriesErkakaks').addEventListener('click', function(e) {
+            if (e.target.classList.contains('category-item')) {
+                const finalCategory = e.target.getAttribute('data-category');
+                const categoryName = e.target.textContent;
+                if (finalCategory === 'kozoynak') {
+                    selectedCategoryText.textContent = "Aksessuarlar > Erkaklar aksessuarlari > Koʻzoynak";
+                    selectedCategoryValue.value = "aksessuar:erkakaks:kozoynak";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesAksessuar').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesErkakaks').classList.add('hidden');
+                    checkFormValidity();
+                } else if (finalCategory === 'soat') {
+                    selectedCategoryText.textContent = "Aksessuarlar > Erkaklar aksessuarlari > Soatlar va qayishlar";
+                    selectedCategoryValue.value = "aksessuar:erkakaks:soat";
+                    selectedCategoryBox.classList.remove('hidden');
+                    mainCategories.classList.add('hidden');
+                    document.getElementById('subCategoriesAksessuar').classList.add('hidden');
+                    document.getElementById('finalSubCategoriesErkakaks').classList.add('hidden');
+                    checkFormValidity();
+                }
+            }
+        });
+
+        changeCategoryBtn.addEventListener('click', function() {
+            document.querySelectorAll('.category-box').forEach(box => box.classList.add('hidden'));
+            mainCategories.classList.remove('hidden');
+            selectedCategoryBox.classList.add('hidden');
+            selectedCategoryValue.value = '';
+            checkFormValidity();
+        });
+
+        function checkFormValidity() {
+            const file = productImage.files[0];
+            const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            const isImageValid = file && validImageTypes.includes(file.type);
+            const isNameValid = productName.value.trim() !== '';
+            const isPriceValid = productPrice.value.trim() !== '' && parseFloat(productPrice.value) >= 0;
+            const isQuantityValid = productQuantity.value.trim() !== '' && parseInt(productQuantity.value) >= 1;
+            const isCategorySelected = !selectedCategoryBox.classList.contains('hidden');
+
+            if (isImageValid) {
+                statusMessage.textContent = "To'g'ri formatdagi fayl";
+                statusMessage.className = "status-message bg-green-500 text-white";
+                imageName.textContent = file.name;
+            } else if (file) {
+                statusMessage.textContent = "Fayl formati noto'g'ri";
+                statusMessage.className = "status-message bg-red-500 text-white";
+                imageName.textContent = '';
+            } else {
+                statusMessage.textContent = '';
+                imageName.textContent = '';
+            }
+
+            uploadButton.classList.toggle('hidden', !(isImageValid && isNameValid && isPriceValid && isQuantityValid && isCategorySelected));
+        }
+
+        productImage.addEventListener('change', checkFormValidity);
+        productName.addEventListener('input', checkFormValidity);
+        productPrice.addEventListener('input', checkFormValidity);
+        productQuantity.addEventListener('input', checkFormValidity);
+
+        function resetForm() {
+            document.getElementById('productForm').reset();
+            statusMessage.textContent = '';
+            imageName.textContent = '';
+            uploadButton.classList.add('hidden');
+            mainCategories.classList.remove('hidden');
+            subCategoriesElektronika.classList.add('hidden');
+            finalSubCategoriesSmartfonlar.classList.add('hidden');
+            selectedCategoryBox.classList.add('hidden');
+            document.getElementById('subCategoriesMaishiy').classList.add('hidden');
+            document.getElementById('finalSubCategoriesKatta').classList.add('hidden');
+            document.getElementById('finalSubCategoriesUy').classList.add('hidden');
+            document.getElementById('subCategoriesQurilish').classList.add('hidden');
+            document.getElementById('finalSubCategoriesAsboblar').classList.add('hidden');
+            document.getElementById('finalSubCategoriesMateriallar').classList.add('hidden');
+            document.getElementById('subCategoriesPoyabzal').classList.add('hidden');
+            document.getElementById('finalSubCategoriesErkak').classList.add('hidden');
+            document.getElementById('finalSubCategoriesAyol').classList.add('hidden');
+            document.getElementById('subCategoriesSalomatlik').classList.add('hidden');
+            document.getElementById('finalSubCategoriesVitaminlar').classList.add('hidden');
+            document.getElementById('finalSubCategoriesSport').classList.add('hidden');
+            document.getElementById('subCategoriesUyrozgor').classList.add('hidden');
+            document.getElementById('finalSubCategoriesOshxona').classList.add('hidden');
+            document.getElementById('finalSubCategoriesMebel').classList.add('hidden');
+            document.getElementById('subCategoriesKiyim').classList.add('hidden');
+            document.getElementById('finalSubCategoriesAyolk').classList.add('hidden');
+            document.getElementById('finalSubCategoriesErkakk').classList.add('hidden');
+            document.getElementById('subCategoriesGozallik').classList.add('hidden');
+            document.getElementById('finalSubCategoriesMakiyaj').classList.add('hidden');
+            document.getElementById('finalSubCategoriesYuz').classList.add('hidden');
+            document.getElementById('subCategoriesAksessuar').classList.add('hidden');
+            document.getElementById('finalSubCategoriesAyolaks').classList.add('hidden');
+            document.getElementById('finalSubCategoriesErkakaks').classList.add('hidden');
+            document.getElementById('finalSubCategoriesNoutbuklar').classList.add('hidden');
+            document.getElementById('finalSubCategoriesTelevizorlar').classList.add('hidden');
+        }
+    });
+</script>

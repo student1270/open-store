@@ -41,19 +41,16 @@ public class ProductRetrievalController {
             }
 
             Category category = categoryService.findById(categoryId);
-            List<Category> categories = categoryService.findAll(); // Barcha kategoriyalarni qo‘shish
 
             model.addAttribute("products", products);
             model.addAttribute("category", category);
             model.addAttribute("sort", sort);
-            model.addAttribute("categories", categories); // Kategoriyalar ro‘yxatini qo‘shish
 
         } catch (IllegalArgumentException e) {
             model.addAttribute("message", "Noto'g'ri kategoriya ID si.");
             model.addAttribute("products", List.of());
             model.addAttribute("category", null);
             model.addAttribute("sort", null);
-            model.addAttribute("categories", categoryService.findAll()); // Xatolik bo‘lsa ham kategoriyalarni ko‘rsatish
         }
 
         return "product";

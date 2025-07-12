@@ -45,8 +45,4 @@ public class Product {
 
     @Column(name = "rating", nullable = true)
     private Double rating;
-
-    public String getImageUrl() {
-        return "/images/" + this.imagePath;
-    }
 }
