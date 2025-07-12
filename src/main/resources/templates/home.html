@@ -220,24 +220,38 @@
                 <a th:href="@{/login}" class="login-button">Kirish</a>
                 <a th:href="@{/register}" class="register-button">Ro‘yxatdan o‘tish</a>
             </div>
+            <a th:href="@{/admin-login}" class="admin-login-link">Adminlar uchun kirish</a>
         </div>
-        <a th:href="@{/admin-login}" class="admin-login-link">Adminlar uchun kirish</a>
-    </div>
+
 </header>
 
-<!-- KATALOG MENU -->
 <div id="catalogMenu" class="catalog-menu">
     <ul>
         <li th:each="category : ${categories}" th:if="${category != null and category.parent == null}">
-            <span th:text="${category.categoryName} ?: 'Noma’lum kategoriya'">Kategoriya nomi</span>
+            <span th:if="${category.categoryName != null}" th:text="${category.categoryName}">Kategoriya</span>
+            <span th:unless="${category.categoryName != null}">Noma’lum kategoriya</span>
+
             <div class="sub-menu" th:unless="${#lists.isEmpty(category.children)}">
                 <ul>
                     <li th:each="subCategory : ${category.children}" th:if="${subCategory != null}">
-                        <a th:href="@{/home/category/{id}(id=${subCategory.id})}" th:text="${subCategory.categoryName} ?: 'Noma’lum subkategoriya'">Subkategoriya</a>
+                        <a th:href="@{/home/category/{id}(id=${subCategory.id})}"
+                           th:if="${subCategory.categoryName != null}"
+                           th:text="${subCategory.categoryName}">Subkategoriya</a>
+                        <a th:href="@{/home/category/{id}(id=${subCategory.id})}"
+                           th:unless="${subCategory.categoryName != null}">
+                            Noma’lum subkategoriya
+                        </a>
+
                         <div class="sub-menu" th:unless="${#lists.isEmpty(subCategory.children)}">
                             <ul>
                                 <li th:each="subSubCategory : ${subCategory.children}" th:if="${subSubCategory != null}">
-                                    <a th:href="@{/home/category/{id}(id=${subSubCategory.id})}" th:text="${subSubCategory.categoryName} ?: 'Noma’lum sub-subkategoriya'">Sub-subkategoriya</a>
+                                    <a th:href="@{/home/category/{id}(id=${subSubCategory.id})}"
+                                       th:if="${subSubCategory.categoryName != null}"
+                                       th:text="${subSubCategory.categoryName}">Sub-subkategoriya</a>
+                                    <a th:href="@{/home/category/{id}(id=${subSubCategory.id})}"
+                                       th:unless="${subSubCategory.categoryName != null}">
+                                        Noma’lum sub-subkategoriya
+                                    </a>
                                 </li>
                             </ul>
                         </div>
@@ -247,6 +261,7 @@
         </li>
     </ul>
 </div>
+
 
 <!-- ASOSIY KONTENT -->
 <div style="padding: 20px;">

@@ -13,6 +13,39 @@
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
         }
+        .logout-button {
+            background-color: #ef4444;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .user-phone {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            background-color: #f3f4f6;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .user-phone:hover {
+            background-color: #e5e7eb;
+            transform: scale(1.05);
+        }
+
 
         header {
             background-color: #fff;
@@ -281,12 +314,21 @@
         <a th:href="@{/cart}" class="cart-button">Savat</a>
     </div>
     <div style="display: flex; gap: 15px; flex-direction: column; align-items: flex-end;">
-        <div sec:authorize="isAnonymous()" style="display: flex; gap: 15px;">
-            <a th:href="@{/login}" class="login-button">Kirish</a>
-            <a th:href="@{/register}" class="register-button">Ro‘yxatdan o‘tish</a>
+        <div sec:authorize="isAuthenticated()">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a th:href="@{/user}" class="user-phone" th:text="${#authentication.principal.user.name} ?: 'Noma’lum foydalanuvchi'"></a>
+                <a th:href="@{/logout}" class="logout-button">Chiqish</a>
+            </div>
         </div>
-        <a th:href="@{/admin-login}" class="admin-login-link" sec:authorize="isAnonymous()">Adminlar uchun kirish</a>
-    </div>
+
+        <div sec:authorize="isAnonymous()">
+            <div style="display: flex; gap: 15px;">
+                <a th:href="@{/login}" class="login-button">Kirish</a>
+                <a th:href="@{/register}" class="register-button">Ro‘yxatdan o‘tish</a>
+            </div>
+            <a th:href="@{/admin-login}" class="admin-login-link">Adminlar uchun kirish</a>
+        </div>
+
 </header>
 
 
