@@ -317,7 +317,10 @@
         <div sec:authorize="isAuthenticated()">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <a th:href="@{/user}" class="user-phone" th:text="${#authentication.principal.user.name} ?: 'Noma’lum foydalanuvchi'"></a>
-                <a th:href="@{/logout}" class="logout-button">Chiqish</a>
+                <form th:action="@{/logout}" method="post" style="display:inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="logout-button">Chiqish</button>
+                </form>
             </div>
         </div>
 
@@ -372,7 +375,7 @@
     <!-- Savat bo'sh bo'lsa -->
     <div th:if="${cartItems == null or cartItems.empty}" class="bg-white p-4 rounded shadow">
         <p class="text-gray-700">Sizning savatingiz bo‘sh.</p>
-        <a th:href="@{/home}" class="text-blue-500 hover:underline">Do‘konga qaytish</a>
+
     </div>
 
     <!-- Savatdagi mahsulotlar -->

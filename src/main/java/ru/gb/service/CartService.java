@@ -206,6 +206,11 @@ public class CartService {
         Cart cart = getOrCreateCart(session);
         Product product = productRepository.findById(productId).orElse(null);
         if (product != null && quantity > 0) {
+            if (quantity > product.getStockQuantity()) {
+                log.warn("Requested quantity exceeds stock: Product ID: {}, Requested: {}, Available: {}",
+                        productId, quantity, product.getStockQuantity());
+                return;
+            }
             cartProductService.addOrUpdateCartProduct(cart, product, quantity);
             if (cart.getUserId() != null) {
                 cartRepository.save(cart);
@@ -213,6 +218,7 @@ public class CartService {
             }
         }
     }
+
 
     @Transactional
     public int getTotalQuantity(HttpSession session) {

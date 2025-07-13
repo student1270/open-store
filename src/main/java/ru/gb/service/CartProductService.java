@@ -24,12 +24,15 @@ public class CartProductService {
 
     @Transactional
     public void addOrUpdateCartProduct(Cart cart, Product product, int quantity) {
-        log.info("Adding or updating cart product: Cart ID: {}, Product ID: {}, Quantity: {}",
-                cart.getId(), product.getId(), quantity);
+        log.info("Adding or updating cart product: Cart ID: {}, Product ID: {}, Quantity: {}", cart.getId(), product.getId(), quantity);
+
         if (quantity <= 0) {
             log.warn("Quantity is less than or equal to zero: {}", quantity);
             return;
         }
+
+        int availableStock = product.getStockQuantity();
+        int newTotalQuantity = quantity;
 
         if (cart.getId() == null) {
             List<CartProduct> items = cart.getItems();
@@ -38,37 +41,52 @@ public class CartProductService {
                     .findFirst();
             if (existingProduct.isPresent()) {
                 CartProduct cartProduct = existingProduct.get();
-                cartProduct.setQuantity(cartProduct.getQuantity() + quantity);
-                log.debug("Updated existing cart product: Product ID: {}, New Quantity: {}",
-                        product.getId(), cartProduct.getQuantity());
+                newTotalQuantity = cartProduct.getQuantity() + quantity;
+                if (newTotalQuantity > availableStock) {
+                    log.warn("Requested quantity exceeds stock for session cart: {} > {}", newTotalQuantity, availableStock);
+                    return;
+                }
+                cartProduct.setQuantity(newTotalQuantity);
+                log.debug("Updated existing cart product: Product ID: {}, New Quantity: {}", product.getId(), cartProduct.getQuantity());
             } else {
+                if (quantity > availableStock) {
+                    log.warn("Requested quantity exceeds stock for session cart: {} > {}", quantity, availableStock);
+                    return;
+                }
                 CartProduct cartProduct = new CartProduct();
                 cartProduct.setCart(cart);
                 cartProduct.setProduct(product);
                 cartProduct.setQuantity(quantity);
                 items.add(cartProduct);
-                log.debug("Added new cart product: Product ID: {}, Quantity: {}",
-                        product.getId(), quantity);
+                log.debug("Added new cart product: Product ID: {}, Quantity: {}", product.getId(), quantity);
             }
         } else {
             Optional<CartProduct> existingProduct = cartProductRepository.findByCartAndProduct(cart, product);
             if (existingProduct.isPresent()) {
                 CartProduct cartProduct = existingProduct.get();
-                cartProduct.setQuantity(cartProduct.getQuantity() + quantity);
+                newTotalQuantity = cartProduct.getQuantity() + quantity;
+                if (newTotalQuantity > availableStock) {
+                    log.warn("Requested quantity exceeds stock for DB cart: {} > {}", newTotalQuantity, availableStock);
+                    return;
+                }
+                cartProduct.setQuantity(newTotalQuantity);
                 cartProductRepository.save(cartProduct);
-                log.debug("Updated existing cart product in DB: Product ID: {}, New Quantity: {}",
-                        product.getId(), cartProduct.getQuantity());
+                log.debug("Updated existing cart product in DB: Product ID: {}, New Quantity: {}", product.getId(), cartProduct.getQuantity());
             } else {
+                if (quantity > availableStock) {
+                    log.warn("Requested quantity exceeds stock for DB cart: {} > {}", quantity, availableStock);
+                    return;
+                }
                 CartProduct cartProduct = new CartProduct();
                 cartProduct.setCart(cart);
                 cartProduct.setProduct(product);
                 cartProduct.setQuantity(quantity);
                 cartProductRepository.save(cartProduct);
-                log.debug("Added new cart product to DB: Product ID: {}, Quantity: {}",
-                        product.getId(), quantity);
+                log.debug("Added new cart product to DB: Product ID: {}, Quantity: {}", product.getId(), quantity);
             }
         }
     }
+
 
     @Transactional
     public void removeProductFromCart(Cart cart, Product product) {

@@ -212,7 +212,11 @@
             <p>Assalomu alaykum, tizimga kirdingiz!</p>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <a th:href="@{/user}" class="user-phone" th:text="${#authentication.principal.user.name} ?: 'Noma’lum foydalanuvchi'"></a>
-                <a th:href="@{/logout}" class="logout-button">Chiqish</a>
+                <form th:action="@{/logout}" method="post" style="display:inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="logout-button">Chiqish</button>
+                </form>
+
             </div>
         </div>
 
