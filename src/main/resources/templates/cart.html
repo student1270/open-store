@@ -436,9 +436,22 @@
                         Savatni tozalash
                     </button>
                 </form>
-                <button onclick="showConfirmModal()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                <!-- Foydalanuvchi tizimga kirgan bo‘lsa -->
+                <button
+                        sec:authorize="isAuthenticated()"
+                        onclick="showConfirmModal()"
+                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                     Xarid qilish
                 </button>
+
+                <!-- Foydalanuvchi anonim bo‘lsa -->
+                <button
+                        sec:authorize="isAnonymous()"
+                        onclick="window.location.href='/login'"
+                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                    Xarid qilish
+                </button>
+
             </div>
         </div>
     </div>
