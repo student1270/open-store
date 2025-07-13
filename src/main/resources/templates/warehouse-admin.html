@@ -11,7 +11,9 @@
 <body class="bg-gradient-to-tr from-gray-900 via-gray-800 to-gray-900 text-white min-h-screen">
 
 <!-- Bildirishnoma Qo'ng'iroqchasi -->
-<div class="fixed top-6 right-6 z-50">
+<!-- Yuqori o‘ngdagi bildirishnoma va chiqish -->
+<div class="fixed top-6 right-6 z-50 flex items-center gap-6">
+    <!-- Qo‘ng‘iroqcha -->
     <div class="relative">
         <button id="notificationButton" onclick="toggleNotificationDropdown()" class="relative text-white focus:outline-none">
             <svg class="w-8 h-8 text-white hover:text-purple-400 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -21,16 +23,26 @@
             <span id="notificationCount" class="absolute -top-2 -right-2 bg-red-600 text-xs text-white font-bold px-2 py-0.5 rounded-full hidden">0</span>
         </button>
 
+        <!-- Bildirishnomalar dropdown -->
         <div id="notificationDropdown" class="hidden absolute right-0 mt-3 w-[600px] bg-white shadow-xl rounded-xl overflow-hidden ring-1 ring-black ring-opacity-10 z-50 text-gray-800">
-            <div class="p-4 border-b border-gray-200 font-bold text-lg">
-                Bildirishnomalar
-            </div>
+            <div class="p-4 border-b border-gray-200 font-bold text-lg">Bildirishnomalar</div>
             <ul id="notificationList" class="max-h-96 overflow-y-auto">
                 <!-- Dinamik bildirishnomalar shu yerga qo'shiladi -->
             </ul>
         </div>
     </div>
+
+    <!-- Chiqish tugmasi -->
+    <form th:action="@{/logout}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit"
+                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow transition transform hover:scale-105">
+            Chiqish
+        </button>
+    </form>
 </div>
+
+
 
 <!-- Omborxona Buyurtmalari -->
 <div class="container mx-auto px-4 py-8">
