@@ -79,6 +79,8 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session
                         .sessionFixation().migrateSession()
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false)
                 );
 
         return http.build();

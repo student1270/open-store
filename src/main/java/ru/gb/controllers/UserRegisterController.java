@@ -1,5 +1,7 @@
 package ru.gb.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,15 +30,26 @@ public class UserRegisterController {
     // AI yozib bergan kod. Lekin tushundim
 
     @PostMapping("/register")
-    public String handleRegister(@ModelAttribute("user") User user, Model model) {
+    public String handleRegister(@ModelAttribute("user") User user, Model model, HttpServletRequest request) {
         if (userService.saveUser(user)) {
+            // 1. Foydalanuvchini yuklash
             UserDetails userDetails = userService.loadUserByUsername(user.getEmailAddress());
+
+            // 2. Authentication obyektini yaratish (parolsiz)
             Authentication auth = new UsernamePasswordAuthenticationToken(
                     userDetails,
-                    null,
+                    null, // Parol o'rniga null
                     userDetails.getAuthorities()
             );
+
+            // 3. SecurityContextni yangilash
             SecurityContextHolder.getContext().setAuthentication(auth);
+
+            // 4. Sessionni yangilash (muhim!)
+            HttpSession session = request.getSession();
+            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+
+            // 5. Profil sahifasiga yo'naltirish
             return "redirect:/home";
         } else {
             model.addAttribute("error", "Ro'yxatdan o'tishda xatolik yuz berdi");

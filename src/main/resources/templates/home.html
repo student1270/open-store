@@ -209,6 +209,7 @@
     </div>
     <div style="display: flex; gap: 15px; flex-direction: column; align-items: flex-end;">
         <div sec:authorize="isAuthenticated()">
+            <p>Assalomu alaykum, tizimga kirdingiz!</p>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <a th:href="@{/user}" class="user-phone" th:text="${#authentication.principal.user.name} ?: 'Noma’lum foydalanuvchi'"></a>
                 <a th:href="@{/logout}" class="logout-button">Chiqish</a>
@@ -216,6 +217,7 @@
         </div>
 
         <div sec:authorize="isAnonymous()">
+            <p>Tizimga kirmagansiz</p>
             <div style="display: flex; gap: 15px;">
                 <a th:href="@{/login}" class="login-button">Kirish</a>
                 <a th:href="@{/register}" class="register-button">Ro‘yxatdan o‘tish</a>

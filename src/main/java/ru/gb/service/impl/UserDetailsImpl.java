@@ -32,7 +32,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null; // Parolsiz tizim uchun null qaytariladi
+        return "";
     }
 
     @Override
