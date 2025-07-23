@@ -33,17 +33,21 @@ public class SecurityConfig {
         http
                 .userDetailsService(adminDetailsService)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/", "/index",
+                        .requestMatchers(
+                                "/css/**", "/js/**", "/images/**", "/", "/index",
                                 "/login", "/admin-login", "/home", "/home/**", "/error",
-                                "/favicon.ico", "/product/**", "/cart", "/cart/add", "/{productId}/reviews", "/reviews", "/reviews/**").permitAll()
+                                "/favicon.ico", "/product/**", "/cart", "/cart/add", "/{productId}/reviews", "/reviews", "/reviews/**"
+                        ).permitAll()
                         .requestMatchers("/api/**", "/ws/**").permitAll()
                         .requestMatchers("/register/**", "/check-user-details").anonymous()
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/user").hasRole(ROLE_USER)
                         .requestMatchers("/order-admin", "/order-admin/**").hasRole(ROLE_ORDER_ADMIN)
                         .requestMatchers("/warehouse-admin").hasRole(ROLE_WAREHOUSE_ADMIN)
                         .requestMatchers("/cart/checkout", "/cart/confirm").hasRole(ROLE_USER)
                         .anyRequest().authenticated()
                 )
+
                 .formLogin(form -> form
                         .loginPage("/admin-login")
                         .loginProcessingUrl("/login")

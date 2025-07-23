@@ -59,3 +59,10 @@ logging:
     ru.gb: TRACE
     org.hibernate.SQL: DEBUG
     org.hibernate.type: TRACE
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
