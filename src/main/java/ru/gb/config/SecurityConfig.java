@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/**", "/ws/**").permitAll()
                         .requestMatchers("/register/**", "/check-user-details").anonymous()
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/user").hasRole(ROLE_USER)
                         .requestMatchers("/order-admin", "/order-admin/**").hasRole(ROLE_ORDER_ADMIN)
                         .requestMatchers("/warehouse-admin").hasRole(ROLE_WAREHOUSE_ADMIN)
