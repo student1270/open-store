@@ -103,6 +103,8 @@
         let expiryDate = null;
 
         function startCountdown(expiry) {
+            console.log('startCountdown called with expiry:', expiry);
+            const parsedExpiry = new Date(expiry + 'Z');
             expiryDate = new Date(expiry).getTime();
             const interval = setInterval(() => {
                 const now = new Date().getTime();
@@ -125,6 +127,7 @@
             resendButton.prop('disabled', true);
             try {
                 const response = await axios.post('/api/send-sms', { email: emailInput.val() });
+                console.log('resendVerificationCode response:', response.data);
                 if (response.data.success) {
                     codeSent = true;
                     codeSection.removeClass('invisible');
@@ -173,6 +176,7 @@
             if (!codeSent) {
                 try {
                     const response = await axios.post('/api/send-sms', { email: emailInput.val() });
+                    console.log('loginForm submit response:', response.data);
                     if (response.data.success) {
                         codeSent = true;
                         codeSection.removeClass('invisible');
