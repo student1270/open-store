@@ -1,17 +1,13 @@
-
-
 package ru.gb.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.gb.model.User;
 import ru.gb.service.UserService;
@@ -21,24 +17,16 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
-@Controller
-@RequestMapping
-public class VerificationController {
+@RestController
+@RequestMapping("/api")
+@RequiredArgsConstructor
+@Slf4j
+public class VerificationRestController {
 
-    private static final Logger log = LoggerFactory.getLogger(VerificationController.class);
+    private final VerificationService verificationService;
+    private final UserService userService;
 
-    @Autowired
-    private VerificationService verificationService;
-
-    @Autowired
-    private UserService userService;
-
-    @GetMapping("/login")
-    public String login() {
-        return "user-login";
-    }
-
-    @PostMapping("/api/check-email")
+    @PostMapping("/check-email")
     public ResponseEntity<?> checkEmail(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         if (email == null || email.isBlank()) {
@@ -55,7 +43,7 @@ public class VerificationController {
         return ResponseEntity.badRequest().body(new CheckEmailResponse(false, "Email topilmadi."));
     }
 
-    @PostMapping("/api/send-sms")
+    @PostMapping("/send-sms")
     public ResponseEntity<?> sendVerificationCode(@RequestBody Map<String, String> payload, HttpServletRequest request) {
         String email = payload.get("email");
         if (email == null || email.isBlank()) {
@@ -74,7 +62,7 @@ public class VerificationController {
         }
     }
 
-    @PostMapping("/api/verify-sms")
+    @PostMapping("/verify-sms")
     public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> payload, HttpServletRequest request) {
         String email = payload.get("email");
         String code = payload.get("code");
@@ -92,7 +80,6 @@ public class VerificationController {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                // Sessiyaga autentifikatsiyani saqlash
                 request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
                 log.info("Foydalanuvchi autentifikatsiya qilindi: email={}, roli={}", email, userDetails.getAuthorities());
                 return ResponseEntity.ok().body(new VerifySmsResponse(true, "Kod tasdiqlandi, tizimga kirish muvaffaqiyatli."));
@@ -104,7 +91,7 @@ public class VerificationController {
         return ResponseEntity.badRequest().body(new VerifySmsResponse(false, "Noto‘g‘ri yoki muddati o‘tgan kod."));
     }
 
-    // Javob modellari
+    // DTOlar
     static class CheckEmailResponse {
         boolean exists;
         String message;

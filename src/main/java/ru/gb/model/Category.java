@@ -23,4 +23,14 @@ public class Category {
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Category> children = new ArrayList<>();
+
+    // Test uchun konstruktor
+    public Category(Long id, String categoryName) {
+        this.id = id;
+        this.categoryName = categoryName;
+    }
+
+    public Category() {
+
+    }
 }

@@ -1,15 +1,13 @@
-
 package ru.gb.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.gb.model.User;
 import ru.gb.service.UserService;
@@ -17,21 +15,22 @@ import ru.gb.service.UserService;
 import java.util.HashMap;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
-public class UserRegisterController {
+public class UserRegisterRestController {
     private final UserService userService;
 
-    @GetMapping("/register")
-    public String showRegisterPage(Model model) {
-        model.addAttribute("user", new User());
-        return "register";
+    @GetMapping("/api/register")
+    public ResponseEntity<?> showRegisterPage() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", new User());
+        return ResponseEntity.ok(response);
     }
 
     // AI yozib bergan kod. Lekin tushundim
 
-    @PostMapping("/register")
-    public String handleRegister(@ModelAttribute("user") User user, Model model, HttpServletRequest request) {
+    @PostMapping("/api/register")
+    public ResponseEntity<?> handleRegister(@RequestBody User user, HttpServletRequest request) {
         if (userService.saveUser(user)) {
             // 1. Foydalanuvchini yuklash
             UserDetails userDetails = userService.loadUserByUsername(user.getEmailAddress());
@@ -51,10 +50,13 @@ public class UserRegisterController {
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
             // 5. Profil sahifasiga yo'naltirish
-            return "redirect:/home";
+            Map<String, String> response = new HashMap<>();
+            response.put("redirect", "/home");
+            return ResponseEntity.ok(response);
         } else {
-            model.addAttribute("error", "Ro'yxatdan o'tishda xatolik yuz berdi");
-            return "register";
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Ro'yxatdan o'tishda xatolik yuz berdi");
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
@@ -86,9 +88,8 @@ public class UserRegisterController {
     }
 */
 
-    @GetMapping("/check-user-details")
-    @ResponseBody
-    public Map<String, Boolean> checkUserDetails(
+    @GetMapping("/api/check-user-details")
+    public ResponseEntity<Map<String, Boolean>> checkUserDetails(
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String phone) {
 
@@ -103,6 +104,6 @@ public class UserRegisterController {
 
         Map<String, Boolean> response = new HashMap<>();
         response.put("exists", exists);
-        return response;
+        return ResponseEntity.ok(response);
     }
 }
