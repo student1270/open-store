@@ -31,7 +31,7 @@ class UserProfileRestControllerTest {
 
     @Test
     void showUserProfile_AuthenticatedUser_ReturnsUserDetails() {
-        // Setup test data
+
         User testUser = new User();
         testUser.setId(1L);
         testUser.setName("John");
@@ -39,33 +39,33 @@ class UserProfileRestControllerTest {
 
         UserDetailsImpl userDetails = new UserDetailsImpl(testUser);
 
-        // Mock authentication - faqat kerakli mocklarni sozlaymiz
+
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(authentication.isAuthenticated()).thenReturn(true);
 
-        // Test
+
         ResponseEntity<?> response = controller.showUserProfile(authentication);
 
-        // Verify
+
         assertEquals(200, response.getStatusCodeValue());
         Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
         assertEquals("John Doe", responseBody.get("userName"));
         assertEquals(1L, responseBody.get("userId"));
 
-        // Kerakli mocklarni tekshiramiz
+
         verify(authentication).isAuthenticated();
         verify(authentication).getPrincipal();
     }
 
     @Test
     void showUserProfile_NotAuthenticated_ReturnsUnauthorized() {
-        // Mock unauthenticated user
+
         when(authentication.isAuthenticated()).thenReturn(false);
 
-        // Test
+
         ResponseEntity<?> response = controller.showUserProfile(authentication);
 
-        // Verify
+
         assertEquals(401, response.getStatusCodeValue());
         Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
         assertEquals("Foydalanuvchi autentifikatsiya qilinmagan", responseBody.get("error"));
@@ -73,10 +73,10 @@ class UserProfileRestControllerTest {
 
     @Test
     void showUserProfile_NullAuthentication_ReturnsUnauthorized() {
-        // Test with null authentication
+
         ResponseEntity<?> response = controller.showUserProfile(null);
 
-        // Verify
+
         assertEquals(401, response.getStatusCodeValue());
         Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
         assertEquals("Foydalanuvchi autentifikatsiya qilinmagan", responseBody.get("error"));

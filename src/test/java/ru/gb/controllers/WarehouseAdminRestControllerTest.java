@@ -29,18 +29,17 @@ class WarehouseAdminRestControllerTest {
         testAdmin.setId(1);
         testAdmin.setUsername("warehouse_admin");
         testAdmin.setPassword("securepass");
-        testAdmin.setRole(Roles.WAREHOUSE_ADMIN); // Faraz qilaylik Roles enumda bunday qiymat bor
+        testAdmin.setRole(Roles.WAREHOUSE_ADMIN);
 
-        // AdminDetails yaratamiz
         AdminDetails adminDetails = new AdminDetails(testAdmin);
 
-        // Authentication ni mock qilamiz
+
         when(authentication.getPrincipal()).thenReturn(adminDetails);
 
-        // Testni bajaramiz
+
         Admin result = controller.getWarehouseAdmin(authentication);
 
-        // Tekshiramiz
+
         assertNotNull(result);
         assertEquals(1, result.getId());
         assertEquals("warehouse_admin", result.getUsername());
@@ -50,10 +49,10 @@ class WarehouseAdminRestControllerTest {
 
     @Test
     void getWarehouseAdmin_ThrowsException_WhenPrincipalIsNotAdminDetails() {
-        // Noto'g'ri turdagi principal
+
         when(authentication.getPrincipal()).thenReturn("not_admin_details");
 
-        // ClassCastException kutamiz
+
         assertThrows(ClassCastException.class, () -> {
             controller.getWarehouseAdmin(authentication);
         });
@@ -61,10 +60,10 @@ class WarehouseAdminRestControllerTest {
 
     @Test
     void getWarehouseAdmin_ThrowsException_WhenNotAuthenticated() {
-        // Authentication null bo'lganda
+
         when(authentication.getPrincipal()).thenReturn(null);
 
-        // NullPointerException kutamiz
+
         assertThrows(NullPointerException.class, () -> {
             controller.getWarehouseAdmin(authentication);
         });

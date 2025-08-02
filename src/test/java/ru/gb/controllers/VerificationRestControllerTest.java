@@ -167,7 +167,7 @@ class VerificationRestControllerTest {
         assertFalse(body.isSuccess());
         assertEquals("Noto‘g‘ri yoki muddati o‘tgan kod.", body.getMessage());
 
-        // Verify no security setup was done
+
         verifyNoInteractions(userService);
         verify(securityContext, never()).setAuthentication(any());
     }

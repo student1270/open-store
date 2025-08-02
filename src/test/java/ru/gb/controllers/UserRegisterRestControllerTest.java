@@ -65,27 +65,27 @@ class UserRegisterRestControllerTest {
 
     @Test
     void handleRegister_SuccessfulRegistration() throws Exception {
-        // Mock user service
+
         when(userService.saveUser(any(User.class))).thenReturn(true);
 
-        // Mock user details
+
         UserDetails userDetails = mock(UserDetails.class);
         when(userService.loadUserByUsername(anyString())).thenReturn(userDetails);
 
-        // Mock security context
+
         SecurityContextHolder.setContext(securityContext);
 
-        // Mock session
+
         when(request.getSession()).thenReturn(session);
 
         ResponseEntity<?> response = controller.handleRegister(testUser, request);
 
-        // Verify response
+
         assertEquals(200, response.getStatusCodeValue());
         Map<String, String> responseBody = (Map<String, String>) response.getBody();
         assertEquals("/home", responseBody.get("redirect"));
 
-        // Verify security setup
+
         verify(securityContext).setAuthentication(any(Authentication.class));
         verify(session).setAttribute(eq("SPRING_SECURITY_CONTEXT"), any(SecurityContext.class));
     }
@@ -100,7 +100,7 @@ class UserRegisterRestControllerTest {
         Map<String, String> responseBody = (Map<String, String>) response.getBody();
         assertEquals("Ro'yxatdan o'tishda xatolik yuz berdi", responseBody.get("error"));
 
-        // Verify no security setup was done
+
         verifyNoInteractions(securityContext);
         verifyNoInteractions(session);
     }

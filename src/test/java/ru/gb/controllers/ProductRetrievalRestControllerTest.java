@@ -67,16 +67,16 @@ class ProductRetrievalRestControllerTest {
 
     @Test
     void getProductsByCategory_DefaultSort() {
-        // Mock sozlamalari
+
         when(productRetrievalService.findProductsByCategory(1L))
                 .thenReturn(Arrays.asList(product1, product2));
         when(categoryService.findById(1L)).thenReturn(testCategory);
         when(categoryService.findAll()).thenReturn(categories);
 
-        // Test qilish
+
         ResponseEntity<?> response = controller.getProductsByCategory(1L, null);
 
-        // Natijalarni tekshirish
+
         assertEquals(200, response.getStatusCodeValue());
         assertTrue(response.getBody() instanceof Map);
 
@@ -89,16 +89,16 @@ class ProductRetrievalRestControllerTest {
 
     @Test
     void getProductsByCategory_PriceAscSort() {
-        // Mock sozlamalari
+
         when(productRetrievalService.findProductsByCategoryAndPriceAsc(1L))
                 .thenReturn(Arrays.asList(product1, product2));
         when(categoryService.findById(1L)).thenReturn(testCategory);
         when(categoryService.findAll()).thenReturn(categories);
 
-        // Test qilish
+
         ResponseEntity<?> response = controller.getProductsByCategory(1L, "arzon");
 
-        // Natijalarni tekshirish
+
         assertEquals(200, response.getStatusCodeValue());
         Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
         assertEquals("arzon", responseBody.get("sort"));
@@ -106,16 +106,16 @@ class ProductRetrievalRestControllerTest {
 
     @Test
     void getProductsByCategory_PriceDescSort() {
-        // Mock sozlamalari
+
         when(productRetrievalService.findProductsByCategoryAndPriceDesc(1L))
                 .thenReturn(Arrays.asList(product2, product1));
         when(categoryService.findById(1L)).thenReturn(testCategory);
         when(categoryService.findAll()).thenReturn(categories);
 
-        // Test qilish
+
         ResponseEntity<?> response = controller.getProductsByCategory(1L, "qimmat");
 
-        // Natijalarni tekshirish
+
         assertEquals(200, response.getStatusCodeValue());
         Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
         assertEquals("qimmat", responseBody.get("sort"));
@@ -123,16 +123,16 @@ class ProductRetrievalRestControllerTest {
 
     @Test
     void getProductsByCategory_EmptyProducts() {
-        // Mock sozlamalari
+
         when(productRetrievalService.findProductsByCategory(1L))
                 .thenReturn(Collections.emptyList());
         when(categoryService.findById(1L)).thenReturn(testCategory);
         when(categoryService.findAll()).thenReturn(categories);
 
-        // Test qilish
+
         ResponseEntity<?> response = controller.getProductsByCategory(1L, null);
 
-        // Natijalarni tekshirish
+
         assertEquals(200, response.getStatusCodeValue());
         Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
         assertEquals(0, ((List<?>) responseBody.get("products")).size());
@@ -140,15 +140,15 @@ class ProductRetrievalRestControllerTest {
 
     @Test
     void getProductsByCategory_InvalidCategory() {
-        // Mock sozlamalari
+
         when(productRetrievalService.findProductsByCategory(999L))
                 .thenThrow(new IllegalArgumentException("Noto'g'ri kategoriya ID si."));
         when(categoryService.findAll()).thenReturn(categories);
 
-        // Test qilish
+
         ResponseEntity<?> response = controller.getProductsByCategory(999L, null);
 
-        // Natijalarni tekshirish
+
         assertEquals(400, response.getStatusCodeValue());
         Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
         assertEquals("Noto'g'ri kategoriya ID si.", responseBody.get("message"));

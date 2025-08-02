@@ -72,15 +72,15 @@ class ProductDetailRestControllerTest {
 
     @Test
     void getProductById_SuccessWithReviews() {
-        // Mock sozlamalari
+
         when(productService.findProductsById(1L)).thenReturn(testProduct);
         when(reviewService.findTop2ByProductIdOrderByLocalDateTimeDesc(1L))
                 .thenReturn(List.of(testReview1, testReview2));
 
-        // Test qilish
+
         ResponseEntity<?> response = controller.getProductById(1L);
 
-        // Natijalarni tekshirish
+
         assertEquals(200, response.getStatusCodeValue());
         assertTrue(response.getBody() instanceof Map);
 

@@ -69,10 +69,10 @@ class OrderAdminRestControllerTest {
                 "test image content".getBytes()
         );
 
-        // Faqat kerakli mockni sozlash
+
         when(productService.saveProduct(any(Product.class), any(MultipartFile.class), anyString())).thenReturn(true);
 
-        // Test qilish
+
         ResponseEntity<?> response = orderAdminRestController.addProduct(
                 "Test Product",
                 "100.50",
@@ -82,17 +82,17 @@ class OrderAdminRestControllerTest {
                 "Electronics:Mobile"
         );
 
-        // Natijalarni tekshirish
+
         assertEquals(200, response.getStatusCodeValue());
         assertEquals("Mahsulot muvaffaqiyatli qo'shildi!", ((Map<?, ?>) response.getBody()).get("message"));
 
-        // Servislar chaqirilganligini tekshirish
+
         verify(productService).saveProduct(any(Product.class), any(MultipartFile.class), anyString());
     }
 
     @Test
     void addProduct_Failure() throws Exception {
-        // Mock fayl yaratish
+
         MultipartFile mockFile = new MockMultipartFile(
                 "image",
                 "test.jpg",
@@ -100,10 +100,10 @@ class OrderAdminRestControllerTest {
                 "test image content".getBytes()
         );
 
-        // Faqat kerakli mockni sozlash
+
         when(productService.saveProduct(any(Product.class), any(MultipartFile.class), anyString())).thenReturn(false);
 
-        // Test qilish
+
         ResponseEntity<?> response = orderAdminRestController.addProduct(
                 "Test Product",
                 "100.50",
@@ -113,17 +113,17 @@ class OrderAdminRestControllerTest {
                 "Electronics:Mobile"
         );
 
-        // Natijalarni tekshirish
+
         assertEquals(500, response.getStatusCodeValue());
         assertEquals("Mahsulot qo'shishda xatolik yuz berdi!", ((Map<?, ?>) response.getBody()).get("error"));
 
-        // Servis chaqirilganligini tekshirish
+
         verify(productService).saveProduct(any(Product.class), any(MultipartFile.class), anyString());
     }
 
     @Test
     void addProduct_InvalidPrice() throws Exception {
-        // Mock fayl yaratish
+
         MultipartFile mockFile = new MockMultipartFile(
                 "image",
                 "test.jpg",
@@ -132,26 +132,26 @@ class OrderAdminRestControllerTest {
         );
 
         try {
-            // Noto'g'ri narx formati bilan test qilish
+
             ResponseEntity<?> response = orderAdminRestController.addProduct(
                     "Test Product",
-                    "invalid_price", // Noto'g'ri narx formati
+                    "invalid_price",
                     "10",
                     "Test description",
                     mockFile,
                     "Electronics:Mobile"
             );
 
-            // Agar exception tashlanmasa, test o'tkazilmadi deb hisoblaymiz
+
             fail("NumberFormatException kutilyapti, lekin tashlanmadi");
         } catch (NumberFormatException e) {
-            // Exception kutilganidek tashlandi, test muvaffaqiyatli
+
             assertTrue(e.getMessage().contains("Character i is neither a decimal digit number"));
         }
     }
     @Test
     void addProduct_InvalidQuantity() {
-        // Mock fayl yaratish
+
         MultipartFile mockFile = new MockMultipartFile(
                 "image",
                 "test.jpg",
@@ -159,19 +159,19 @@ class OrderAdminRestControllerTest {
                 "test image content".getBytes()
         );
 
-        // Test qilish va exception kutish
+
         Exception exception = assertThrows(NumberFormatException.class, () -> {
             orderAdminRestController.addProduct(
                     "Test Product",
                     "100.50",
-                    "invalid_quantity", // Noto'g'ri miqdor formati
+                    "invalid_quantity",
                     "Test description",
                     mockFile,
                     "Electronics:Mobile"
             );
         });
 
-        // Exception xabarini tekshirish (agar kerak bo'lsa)
+
         assertTrue(exception.getMessage().contains("For input string: \"invalid_quantity\""));
     }
 }

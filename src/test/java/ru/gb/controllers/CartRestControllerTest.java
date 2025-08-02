@@ -46,7 +46,7 @@ class CartRestControllerTest {
         SecurityContextHolder.setContext(securityContext);
     }
 
-    // ========== Test Data Helpers ==========
+
     private User createTestUser(Long id, Roles role) {
         User user = new User();
         user.setId(id);
@@ -74,7 +74,7 @@ class CartRestControllerTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
     }
 
-    // ========== addToCart Testlari ==========
+
     @Test
     void addToCart_Success() {
         when(cartService.addToCart(1L, 2, session)).thenReturn(true);
@@ -103,7 +103,7 @@ class CartRestControllerTest {
         assertEquals("Omborda yetarli mahsulot mavjud emas", ((Map<?, ?>) response.getBody()).get("error"));
     }
 
-    // ========== viewCart Testlari ==========
+
     @Test
     void viewCart_AnonymousUser() {
         // Given
@@ -114,10 +114,10 @@ class CartRestControllerTest {
         when(cartService.getTotalQuantity(session)).thenReturn(2);
         when(cartService.getTotalPrice(session)).thenReturn(BigDecimal.valueOf(2000));
 
-        // When
+
         ResponseEntity<?> response = cartRestController.viewCart(session, null);
 
-        // Then
+
         assertEquals(200, response.getStatusCodeValue());
         Map<?, ?> body = (Map<?, ?>) response.getBody();
         assertEquals(mockItems, body.get("items"));
@@ -149,7 +149,7 @@ class CartRestControllerTest {
         verify(session).removeAttribute("cart");
     }
 
-    // ========== updateQuantity Testlari ==========
+
     @Test
     void updateQuantity_Success() {
         ResponseEntity<?> response = cartRestController.updateQuantity(1L, 3, session);
@@ -167,7 +167,7 @@ class CartRestControllerTest {
         assertEquals("Miqdor 1 dan kam bo‘lmasligi kerak", ((Map<?, ?>) response.getBody()).get("error"));
     }
 
-    // ========== removeItem va clearCart Testlari ==========
+
     @Test
     void removeItem_Success() {
         ResponseEntity<?> response = cartRestController.removeItem(1L, session);
@@ -186,7 +186,7 @@ class CartRestControllerTest {
         verify(cartService).clearCart(session);
     }
 
-    // ========== checkout va confirmPurchase Testlari ==========
+
     @Test
     void checkout_Unauthenticated() {
         when(securityContext.getAuthentication()).thenReturn(null);
@@ -245,7 +245,7 @@ class CartRestControllerTest {
         assertEquals("Xaridni amalga oshirishda xatolik!", ((Map<?, ?>) response.getBody()).get("error"));
     }
 
-    // ========== cancelPurchase Testi ==========
+
     @Test
     void cancelPurchase_Success() {
         ResponseEntity<?> response = cartRestController.cancelPurchase();

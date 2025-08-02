@@ -28,22 +28,22 @@ class HomeRestControllerTest {
 
     @Test
     void homePage_ReturnsCorrectResponse() {
-        // 1. Test uchun ma'lumotlarni tayyorlash
+
         Category category1 = new Category(1L, "Elektronika");
         Category category2 = new Category(2L, "Kiyim");
         List<Category> mockCategories = Arrays.asList(category1, category2);
 
-        // 2. Mock service sozlamalari
+
         when(categoryService.findAll()).thenReturn(mockCategories);
 
-        // 3. Test qilinadigan metodni chaqirish
+
         ResponseEntity<?> response = homeRestController.homePage();
 
-        // 4. Natijalarni tekshirish
+
         assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
 
-        // Response body tekshirish
+
         assertTrue(response.getBody() instanceof Map);
         Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
 
@@ -54,13 +54,13 @@ class HomeRestControllerTest {
         assertEquals(2, returnedCategories.size());
         assertEquals("Elektronika", returnedCategories.get(0).getCategoryName());
 
-        // Service metodining chaqirilganligini tekshirish
+
         verify(categoryService, times(1)).findAll();
     }
 
     @Test
     void homePage_ReturnsEmptyCategoriesList() {
-        // Bo'sh ro'yxat testi
+
         when(categoryService.findAll()).thenReturn(List.of());
 
         ResponseEntity<?> response = homeRestController.homePage();
