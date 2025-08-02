@@ -15,62 +15,62 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Controller
-@RequestMapping("/product")
+//@Controller
+//@RequestMapping("/product")
 public class ProductDetailController {
 
-    @Autowired
-    private ProductService productService;
-
-    @Autowired
-    private ReviewService reviewService;
-
-    @GetMapping("/{productId}")
-    public String getProductById(@PathVariable Long productId, Model model) {
-        try {
-            // Mahsulotni topamiz
-            Product product = productService.findProductsById(productId);
-            if (product == null) {
-                return "error/404";
-            }
-
-            model.addAttribute("productDetailPage", product);
-
-            // So'nggi 2 ta review (null bo'lishi mumkin) — null'larni chiqarib tashlaymiz
-            List<Review> latestReviews = reviewService.findTop2ByProductIdOrderByLocalDateTimeDesc(productId)
-                    .stream()
-                    .filter(Objects::nonNull) // null elementlarni olib tashlaymiz
-                    .collect(Collectors.toList());
-
-            model.addAttribute("latestTwoReviews", latestReviews);
-
-            return "product-detail-page";
-        } catch (Exception e) {
-            // Agar xatolik bo‘lsa — 500 sahifasi
-            return "error/500";
-        }
-    }
-
-    @GetMapping("/{productId}/reviews")
-    public String findReviewsPage(
-            @PathVariable Long productId,
-            @RequestParam(value = "feedbackId", required = false) Long feedbackId,
-            Model model) {
-        // Fikr-mulohazalarni topamiz va null'larni chiqarib tashlaymiz
-        List<Review> reviews = reviewService.findReviewsByProductIdDesc(productId)
-                .stream()
-                .filter(Objects::nonNull) // null elementlarni olib tashlaymiz
-                .collect(Collectors.toList());
-
-        model.addAttribute("reviews", reviews);
-        model.addAttribute("productId", productId);
-
-        if (feedbackId != null) {
-            model.addAttribute("highlightFeedbackId", feedbackId);
-        }
-
-        return "product-reviews";
-    }
+//    @Autowired
+//    private ProductService productService;
+//
+//    @Autowired
+//    private ReviewService reviewService;
+//
+//    @GetMapping("/{productId}")
+//    public String getProductById(@PathVariable Long productId, Model model) {
+//        try {
+//            // Mahsulotni topamiz
+//            Product product = productService.findProductsById(productId);
+//            if (product == null) {
+//                return "error/404";
+//            }
+//
+//            model.addAttribute("productDetailPage", product);
+//
+//            // So'nggi 2 ta review (null bo'lishi mumkin) — null'larni chiqarib tashlaymiz
+//            List<Review> latestReviews = reviewService.findTop2ByProductIdOrderByLocalDateTimeDesc(productId)
+//                    .stream()
+//                    .filter(Objects::nonNull) // null elementlarni olib tashlaymiz
+//                    .collect(Collectors.toList());
+//
+//            model.addAttribute("latestTwoReviews", latestReviews);
+//
+//            return "product-detail-page";
+//        } catch (Exception e) {
+//            // Agar xatolik bo‘lsa — 500 sahifasi
+//            return "error/500";
+//        }
+//    }
+//
+//    @GetMapping("/{productId}/reviews")
+//    public String findReviewsPage(
+//            @PathVariable Long productId,
+//            @RequestParam(value = "feedbackId", required = false) Long feedbackId,
+//            Model model) {
+//        // Fikr-mulohazalarni topamiz va null'larni chiqarib tashlaymiz
+//        List<Review> reviews = reviewService.findReviewsByProductIdDesc(productId)
+//                .stream()
+//                .filter(Objects::nonNull) // null elementlarni olib tashlaymiz
+//                .collect(Collectors.toList());
+//
+//        model.addAttribute("reviews", reviews);
+//        model.addAttribute("productId", productId);
+//
+//        if (feedbackId != null) {
+//            model.addAttribute("highlightFeedbackId", feedbackId);
+//        }
+//
+//        return "product-reviews";
+//    }
 }
 
 

@@ -1,6 +1,7 @@
 package ru.gb.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -91,7 +92,8 @@ public class VerificationRestController {
         return ResponseEntity.badRequest().body(new VerifySmsResponse(false, "Noto‘g‘ri yoki muddati o‘tgan kod."));
     }
 
-    // DTOlar
+
+    @Getter
     static class CheckEmailResponse {
         boolean exists;
         String message;
@@ -101,10 +103,9 @@ public class VerificationRestController {
             this.message = message;
         }
 
-        public boolean isExists() { return exists; }
-        public String getMessage() { return message; }
     }
 
+    @Getter
     static class SendSmsResponse {
         boolean success;
         String message;
@@ -116,11 +117,9 @@ public class VerificationRestController {
             this.expiryDate = expiryDate;
         }
 
-        public boolean isSuccess() { return success; }
-        public String getMessage() { return message; }
-        public String getExpiryDate() { return expiryDate; }
     }
 
+    @Getter
     static class VerifySmsResponse {
         boolean success;
         String message;
@@ -130,7 +129,5 @@ public class VerificationRestController {
             this.message = message;
         }
 
-        public boolean isSuccess() { return success; }
-        public String getMessage() { return message; }
     }
 }

@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.gb.model.Order;
 import ru.gb.model.OrderItem;
-import ru.gb.model.OrderItemDto;
-import ru.gb.model.OrderNotificationDto;
+import ru.gb.model.dto.OrderItemDto;
+import ru.gb.model.dto.OrderNotificationDto;
 import ru.gb.service.OrderService;
 
 import jakarta.validation.constraints.NotNull;

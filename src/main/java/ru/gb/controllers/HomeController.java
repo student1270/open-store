@@ -14,13 +14,13 @@ import ru.gb.service.CategoryService;
 @Controller
 public class HomeController {
 
-    @Autowired
-    private CategoryService categoryService;
-
-    @GetMapping({"/", "/home"})
-    public String homePage(Model model) {
-        model.addAttribute("title", "OpenStore - Bosh sahifa");
-        model.addAttribute("categories", categoryService.findAll());
-        return "home";
-    }
+//    @Autowired
+//    private CategoryService categoryService;
+//
+//    @GetMapping({"/", "/home"})
+//    public String homePage(Model model) {
+//        model.addAttribute("title", "OpenStore - Bosh sahifa");
+//        model.addAttribute("categories", categoryService.findAll());
+//        return "home";
+//    }
 }
