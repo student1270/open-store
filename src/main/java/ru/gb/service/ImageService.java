@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @Service
 public class ImageService {
-    @Value("${app.image.upload-dir}")
+    @Value("${APP_IMAGE_UPLOAD_DIR}")
     private String imageUploadDir;
 
     private final List<String> allowedFormats = Arrays.asList("png", "jpg", "jpeg", "tiff", "tif", "webp", "heif", "heic");

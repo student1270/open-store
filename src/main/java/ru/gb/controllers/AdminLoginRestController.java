@@ -5,10 +5,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-@RestController
+//@RestController
 public class AdminLoginRestController {
-    @GetMapping("/api/admin-login")
-    public Map<String, String> adminLoginPage() {
-        return Map.of("message", "Admin login page available");
-    }
+//    @GetMapping("/api/admin-login")
+//    public Map<String, String> adminLoginPage() {
+//        return Map.of("message", "Admin login page available");
+//    }
 }

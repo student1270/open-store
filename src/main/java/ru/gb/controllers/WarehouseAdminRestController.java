@@ -7,13 +7,13 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.gb.service.impl.AdminDetails;
 import ru.gb.model.Admin;
 
-@RestController
-@RequestMapping("/api/warehouse-admin")
+//@RestController
+//@RequestMapping("/api/warehouse-admin")
 public class WarehouseAdminRestController {
 
-    @GetMapping
-    public Admin getWarehouseAdmin(Authentication authentication) {
-        AdminDetails adminDetails = (AdminDetails) authentication.getPrincipal();
-        return adminDetails.getAdmin();
-    }
+//    @GetMapping
+//    public Admin getWarehouseAdmin(Authentication authentication) {
+//        AdminDetails adminDetails = (AdminDetails) authentication.getPrincipal();
+//        return adminDetails.getAdmin();
+//    }
 }

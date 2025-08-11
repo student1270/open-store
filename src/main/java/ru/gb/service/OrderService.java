@@ -110,7 +110,7 @@ public class OrderService {
             dtos = dtos.stream()
                     .filter(dto -> "PENDING_PAYMENT".equals(dto.getStatus()))
                     .collect(Collectors.toList());
-        } // "all" yoki boshqa holatlar uchun filtr qo'llanmaydi
+        }
 
         log.debug("Qaytarilgan buyurtmalar soni: {}", dtos.size());
         return dtos;
