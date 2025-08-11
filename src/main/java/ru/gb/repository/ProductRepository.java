@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import ru.gb.model.Product;
 
 import java.util.List;
-// ProductRetrievalRepository bilan ProductReporitory birlashtirildi.
+// ProductRetrievalRepository bilan ProductReporitory birlashtirildi
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p WHERE p.category.id = :categoryId")
