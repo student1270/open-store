@@ -11,7 +11,7 @@ import ru.gb.service.CategoryService;
 import ru.gb.service.ProductService;
 
 import java.util.List;
-
+// ProductRetrievalController ProductController ga o'zgartirildi
 @Controller
 @RequestMapping("/home")
 public class ProductController {
