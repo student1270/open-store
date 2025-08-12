@@ -29,7 +29,7 @@ public class ProductController {
             Model model
     ) {
         try {
-            Sort sortOption = Sort.by(Sort.Direction.DESC, "createdAt"); // default — yangi qo‘shilganlar
+            Sort sortOption = Sort.by(Sort.Direction.DESC, "createdAt");
             if ("arzon".equalsIgnoreCase(sort)) {
                 sortOption = Sort.by(Sort.Direction.ASC, "price");
             } else if ("qimmat".equalsIgnoreCase(sort)) {
