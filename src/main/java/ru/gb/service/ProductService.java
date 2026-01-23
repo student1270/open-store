@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Service
-// ProductRetrievalService va ProductService birlashtirildi.
+
 public class ProductService {
 
     @Autowired
